@@ -1,9 +1,11 @@
 import { posix as pathPosix } from 'path-browserify'
 import axios from 'redaxios'
 
-import { driveApi, cacheControlHeader } from '../../../config/api.config'
-import { encodePath, getAccessToken, checkAuthRoute } from '.'
+import { cacheControlHeader, driveApi } from '../../../config/api.config'
+import { checkAuthRoute, encodePath, getAccessToken } from '.'
 import { NextRequest } from 'next/server'
+
+import '../../polyfills'
 
 export const runtime = 'edge'
 
@@ -19,10 +21,7 @@ export default async function handler(req: NextRequest): Promise<Response> {
   if (path === '[...path]') {
     return new Response(JSON.stringify({ error: 'No path specified.' }), { status: 400 })
   }
-  // If the path is not a valid path, return 400
-  if (typeof path !== 'string') {
-    return new Response(JSON.stringify({ error: 'Path query invalid.' }), { status: 400 })
-  }
+
   const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path))
 
   // Handle protected routes authentication
@@ -60,15 +59,13 @@ export default async function handler(req: NextRequest): Promise<Response> {
     if ('@microsoft.graph.downloadUrl' in data) {
       // Only proxy raw file content response for files up to 4MB
       if (proxy && 'size' in data && data['size'] < 4194304) {
-        const { headers, data: stream } = await axios.get(data['@microsoft.graph.downloadUrl'] as string, {
-          responseType: 'stream',
-        })
-        headers['Cache-Control'] = cacheControlHeader
-        // Send data stream as response
-        // TODO
-        // res.writeHead(200, headers as AxiosResponseHeaders)
-        // stream.pipe(res)
-        return new Response()
+        // Fetch and proxy the file content using Web Streams API
+        const fileResponse = await fetch(data['@microsoft.graph.downloadUrl'] as string)
+        // Prepare headers for the proxied response
+        headers['Content-Type'] = fileResponse.headers.get('Content-Type') || 'application/octet-stream'
+        headers['Content-Length'] = String(data['size'])
+        // Return the streamed response
+        return new Response(fileResponse.body, { status: 200, headers })
       } else {
         headers['Location'] = data['@microsoft.graph.downloadUrl'] as string
         return new Response(null, { status: 302, headers: headers})

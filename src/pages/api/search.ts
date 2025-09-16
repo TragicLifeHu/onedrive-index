@@ -37,28 +37,22 @@ export default async function handler(req: NextRequest): Promise<Response> {
 
   // TODO: Set edge function caching for faster load times
 
-  if (typeof searchQuery === 'string') {
-    // Construct Microsoft Graph Search API URL, and perform search only under the base directory
-    const searchRootPath = encodePath('/')
-    const encodedPath = searchRootPath === '' ? searchRootPath : searchRootPath + ':'
-
-    const searchApi = `${apiConfig.driveApi}/root${encodedPath}/search(q='${sanitiseQuery(searchQuery)}')`
-
-    try {
-      const { data } = await axios.get(searchApi, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        params: {
-          select: 'id,name,file,folder,parentReference',
-          top: siteConfig.maxItems,
-        },
-      })
-      return NextResponse.json(data.value)
-    } catch (error: any) {
-      return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), {
-        status: error?.response?.status ?? 500,
-      })
-    }
-  } else {
-    return NextResponse.json([])
+   // Construct Microsoft Graph Search API URL, and perform search only under the base directory
+  const searchRootPath = encodePath('/')
+  const encodedPath = searchRootPath === '' ? searchRootPath : searchRootPath + ':'
+  const searchApi = `${apiConfig.driveApi}/root${encodedPath}/search(q='${sanitiseQuery(searchQuery)}')`
+  try {
+    const { data } = await axios.get(searchApi, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: {
+        select: 'id,name,file,folder,parentReference',
+        top: siteConfig.maxItems,
+      },
+    })
+    return NextResponse.json(data.value)
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), {
+      status: error?.response?.status ?? 500,
+    })
   }
 }

@@ -1,4 +1,4 @@
-import '../polyfills'
+import '../../polyfills'
 import { posix as pathPosix } from 'path-browserify'
 
 import axios from 'redaxios'
@@ -90,7 +90,6 @@ export function getAuthTokenPath(path: string) {
   const protectedRoutes = siteConfig.protectedRoutes as string[]
   let authTokenPath = ''
   for (let r of protectedRoutes) {
-    if (typeof r !== 'string') continue
     r = r.toLowerCase().replace(/\/$/, '') + '/'
     if (path.startsWith(r)) {
       authTokenPath = `${r}.password`
@@ -110,8 +109,7 @@ export function getAuthTokenPath(path: string) {
  *
  * @param cleanPath Sanitised directory path, used for matching whether route is protected
  * @param accessToken OneDrive API access token
- * @param req Next.js request object
- * @param res Next.js response object
+ * @param odTokenHeader
  */
 export async function checkAuthRoute(
   cleanPath: string,
@@ -190,17 +188,9 @@ export default async function handler(req: NextRequest): Promise<Response> {
   if (path === '[...path]') {
     return new Response(JSON.stringify({ error: 'No path specified.' }), { status: 400 })
   }
-  // If the path is not a valid path, return 400
-  if (typeof path !== 'string') {
-    return new Response(JSON.stringify({ error: 'Path query invalid.' }), { status: 400 })
-  }
+
   // Besides normalizing and making absolute, trailing slashes are trimmed
   const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path)).replace(/\/$/, '')
-
-  // Validate sort param
-  if (typeof sort !== 'string') {
-    return new Response(JSON.stringify({ error: 'Sort query invalid.' }), { status: 400 })
-  }
 
   const accessToken = await getAccessToken()
 
