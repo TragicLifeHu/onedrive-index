@@ -1,5 +1,4 @@
 import axios from 'redaxios'
-import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { encodePath, getAccessToken } from '.'
 import apiConfig from '../../../config/api.config'

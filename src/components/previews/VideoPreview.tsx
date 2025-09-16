@@ -2,12 +2,11 @@ import type { OdFileObject } from '../../types'
 
 import { FC, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import dynamic from 'next/dynamic'
-
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import type { PlyrOptions, PlyrSource } from 'plyr-react'
 import { useClipboard } from 'use-clipboard-copy'
+import dynamic from 'next/dynamic'
 
 import { getBaseUrl } from '../../utils/getBaseUrl'
 import { getExtension } from '../../utils/getFileIcon'
@@ -17,10 +16,10 @@ import { DownloadButton } from '../DownloadBtnGtoup'
 import { DownloadBtnContainer, PreviewContainer } from './Containers'
 import Loading from '../Loading'
 import CustomEmbedLinkMenu from '../CustomEmbedLinkMenu'
+// import Plyr from 'plyr-react'
+const Plyr: any = dynamic(() => import('plyr-react').then(m => (m as any).default ?? (m as any)), { ssr: false })
 
 import 'plyr-react/plyr.css'
-
-const Plyr = dynamic(() => import('plyr-react'), { ssr: false })
 
 const VideoPlayer: FC<{
   videoName: string
@@ -47,7 +46,8 @@ const VideoPlayer: FC<{
     if (isFlv) {
       const loadFlv = () => {
         // Really hacky way to get the exposed video element from Plyr
-        const video = document.getElementById('plyr')
+        const video = document.getElementById('plyr') as HTMLVideoElement | null
+        if (!video) return
         const flv = mpegts.createPlayer({ url: videoUrl, type: 'flv' })
         flv.attachMediaElement(video)
         flv.load()
@@ -62,16 +62,17 @@ const VideoPlayer: FC<{
     title: videoName,
     poster: thumbnail,
     tracks: [{ kind: 'captions', label: videoName, src: '', default: true }],
+    sources: !isFlv ? [{ src: videoUrl }] : [],
   }
   const plyrOptions: PlyrOptions = {
     ratio: `${width ?? 16}:${height ?? 9}`,
     fullscreen: { iosNative: true },
   }
   if (!isFlv) {
-    // If the video is not in flv format, we can use the native plyr and add sources directly with the video URL
-    plyrSource['sources'] = [{ src: videoUrl }]
+    return <Plyr source={plyrSource as PlyrSource} options={plyrOptions} />
   }
-  return <Plyr id="plyr" source={plyrSource as PlyrSource} options={plyrOptions} />
+  // For FLV, Plyr is not used for playback, just for UI
+  return <video id="plyr" controls poster={thumbnail} style={{ width: '100%', height: '100%' }} />
 }
 
 const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {

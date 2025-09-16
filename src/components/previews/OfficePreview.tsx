@@ -1,8 +1,12 @@
 import type { OdFileObject } from '../../types'
 import { FC} from 'react'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
 
-import DocViewer from 'react-doc-viewer'
+// import DocViewer from 'react-doc-viewer'
+const DocViewer: any = dynamic(() => import('react-doc-viewer').then(m => (m as any).default ?? (m as any)), {
+  ssr: false,
+})
 
 import DownloadButtonGroup from '../DownloadBtnGtoup'
 import { DownloadBtnContainer } from './Containers'
