@@ -63,7 +63,6 @@
   color: #24292e;
   background-color: #ffffff;
   font-size: 16px;
-  line-height: 1.5;
   word-wrap: break-word;
 }
 
@@ -85,8 +84,7 @@
 }
 
 .markdown-body strong {
-  font-weight: inherit;
-  font-weight: bolder;
+    font-weight: bolder;
 }
 
 .markdown-body h1 {
@@ -721,7 +719,7 @@
 }
 
 .markdown-body li {
-  word-wrap: break-all;
+  word-wrap: break-word;
 }
 
 .markdown-body li > p {
@@ -832,7 +830,7 @@
 
 .markdown-body pre code {
   display: inline;
-  max-width: auto;
+  max-width: none;
   padding: 0;
   margin: 0;
   overflow: visible;
@@ -999,8 +997,7 @@
   }
   .markdown-body hr {
     border-bottom: 1px solid #21262d;
-    border-bottom-color: #21262d;
-    background-color: #30363d;
+      background-color: #30363d;
   }
   .markdown-body kbd {
     color: #b1bac4;
