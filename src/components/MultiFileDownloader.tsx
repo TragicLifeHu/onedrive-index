@@ -52,6 +52,7 @@ export function downloadBlob({ blob, name }: { blob: Blob; name: string }) {
 /**
  * Download multiple files after compressing them into a zip
  * @param toastId Toast ID to be used for toast notification
+ * @param router
  * @param files Files to be downloaded
  * @param folder Optional folder name to hold files, otherwise flatten files in the zip
  */
@@ -91,6 +92,7 @@ export async function downloadMultipleFiles({
 /**
  * Download hierarchical tree-like files after compressing them into a zip
  * @param toastId Toast ID to be used for toast notification
+ * @param router Next router instance, used for reloading the page
  * @param files Files to be downloaded. Array of file and folder items excluding root folder.
  * Folder items MUST be in front of its children items in the array.
  * Use async generator because generation of the array may be slow.
@@ -193,7 +195,7 @@ export async function* traverseFolder(path: string): AsyncGenerator<TraverseItem
   }
 
   // Pool containing Promises of folder requests
-  let pool = [genTask(0, path)]
+  let pool = [await genTask(0, path)]
 
   // Map as item buffer for folders with pagination
   const buf: { [k: string]: TraverseItem[] } = {}
@@ -236,20 +238,19 @@ export async function* traverseFolder(path: string): AsyncGenerator<TraverseItem
 
       // Append next page task to the pool at the end
       const i = pool.length
-      pool[i] = genTask(i, path, data.next)
+      pool[i] = await genTask(i, path, data.next)
     } else {
       const allItems = (buf[path] ?? []).concat(items)
       if (buf[path]) {
         delete buf[path]
       }
 
-      allItems
-        .filter(item => item.isFolder)
-        .forEach(item => {
+      for (const item1 of allItems
+        .filter(item => item.isFolder)) {
           // Append new folder tasks to the pool at the end
           const i = pool.length
-          pool[i] = genTask(i, item.path)
-        })
+          pool[i] = await genTask(i, item1.path)
+        }
       yield* allItems
     }
   }

@@ -2,6 +2,7 @@ import type { ParsedUrlQuery } from 'querystring'
 
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React from 'react'
 
 const HomeCrumb = () => {
   return (

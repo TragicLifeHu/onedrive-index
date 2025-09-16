@@ -164,7 +164,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
   if (error) {
     // If error includes 403 which means the user has not completed initial setup, redirect to OAuth page
     if (error.status === 403) {
-      router.push('/onedrive-oauth/step-1')
+      router.push('/onedrive-oauth/step-1').then(r => console.log(r))
       return <div />
     }
 

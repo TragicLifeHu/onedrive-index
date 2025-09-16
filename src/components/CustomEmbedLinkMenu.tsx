@@ -1,5 +1,5 @@
 import { Dispatch, Fragment, SetStateAction, useRef, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { Description, Dialog, DialogTitle, Transition, TransitionChild } from '@headlessui/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useClipboard } from 'use-clipboard-copy'
 
@@ -48,7 +48,7 @@ export default function CustomEmbedLinkMenu({
     <Transition appear show={menuOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" onClose={closeMenu} initialFocus={focusInputRef}>
         <div className="min-h-screen px-4 text-center">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-100"
             enterFrom="opacity-0"
@@ -57,14 +57,14 @@ export default function CustomEmbedLinkMenu({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-white/60 dark:bg-gray-800/60" />
-          </Transition.Child>
+            <div className="fixed inset-0 bg-white/60 dark:bg-gray-800/60" aria-hidden="true" />
+          </TransitionChild>
 
           {/* This element is to trick the browser into centering the modal contents. */}
           <span className="inline-block h-screen align-middle" aria-hidden="true">
             &#8203;
           </span>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-100"
             enterFrom="opacity-0 scale-95"
@@ -74,10 +74,10 @@ export default function CustomEmbedLinkMenu({
             leaveTo="opacity-0 scale-95"
           >
             <div className="inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden overflow-y-scroll rounded border border-gray-400/30 bg-white p-4 text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
-              <Dialog.Title as="h3" className="py-2 text-xl font-bold">
+              <DialogTitle as="h3" className="py-2 text-xl font-bold">
                 {'Customise direct link'}
-              </Dialog.Title>
-              <Dialog.Description as="p" className="py-2 opacity-80">
+              </DialogTitle>
+              <Description as="p" className="py-2 opacity-80">
                 <>
                   {'Change the raw file direct link to a URL ending with the extension of the file.'}{' '}
                   <a
@@ -89,7 +89,7 @@ export default function CustomEmbedLinkMenu({
                     {'What is this?'}
                   </a>
                 </>
-              </Dialog.Description>
+              </Description>
 
               <div className="mt-4">
                 <h4 className="py-2 text-xs font-medium uppercase tracking-wider">{'Filename'}</h4>
@@ -120,7 +120,7 @@ export default function CustomEmbedLinkMenu({
                 />
               </div>
             </div>
-          </Transition.Child>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>

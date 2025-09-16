@@ -4,14 +4,12 @@ import { Dispatch, Fragment, SetStateAction, useState } from 'react'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { useAsync } from 'react-async-hook'
 import useConstant from 'use-constant'
-
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Dialog, Transition } from '@headlessui/react'
+import { Dialog, DialogTitle, Transition, TransitionChild } from '@headlessui/react'
 
 import type { OdDriveItem, OdSearchResult } from '../types'
 import { LoadingIcon } from './Loading'
-
 import { getFileIcon } from '../utils/getFileIcon'
 import { fetcher } from '../utils/fetchWithSWR'
 import siteConfig from '../../config/site.config'
@@ -180,7 +178,7 @@ export default function SearchModal({
     <Transition appear show={searchOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-[200] overflow-y-auto" onClose={closeSearchBox}>
         <div className="min-h-screen px-4 text-center">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-100"
             enterFrom="opacity-0"
@@ -189,10 +187,10 @@ export default function SearchModal({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-white/80 dark:bg-gray-800/80" />
-          </Transition.Child>
+            <div className="fixed inset-0 bg-white/80 dark:bg-gray-800/80" aria-hidden="true" />
+          </TransitionChild>
 
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-100"
             enterFrom="opacity-0 scale-95"
@@ -202,7 +200,7 @@ export default function SearchModal({
             leaveTo="opacity-0 scale-95"
           >
             <div className="my-12 inline-block w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 text-left shadow-xl transition-all">
-              <Dialog.Title
+              <DialogTitle
                 as="h3"
                 className="flex items-center space-x-4 border-b border-gray-400/30 bg-gray-50 p-4 dark:bg-gray-800 dark:text-white"
               >
@@ -216,7 +214,7 @@ export default function SearchModal({
                   onChange={e => setQuery(e.target.value)}
                 />
                 <div className="rounded-lg bg-gray-200 px-2 py-1 text-xs font-medium dark:bg-gray-700">ESC</div>
-              </Dialog.Title>
+              </DialogTitle>
               <div
                 className="max-h-[80vh] overflow-x-hidden overflow-y-scroll bg-white dark:bg-gray-900 dark:text-white"
                 onClick={closeSearchBox}
@@ -241,7 +239,7 @@ export default function SearchModal({
                 )}
               </div>
             </div>
-          </Transition.Child>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>
