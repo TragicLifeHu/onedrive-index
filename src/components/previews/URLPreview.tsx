@@ -51,9 +51,9 @@ const TextPreview = ({ file }) => {
           <DownloadButton
             onClickCallback={() => window.open(parseDotUrl(content) ?? '')}
             btnColor="blue"
-            btnText={'Open URL'}
+            btnText="Open URL"
             btnIcon="external-link-alt"
-            btnTitle={`Open URL ${' ' + parseDotUrl(content) ?? ''}`}
+            btnTitle={`Open URL ${parseDotUrl(content) ?? ''}`}
           />
         </div>
       </DownloadBtnContainer>

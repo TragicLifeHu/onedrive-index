@@ -1,4 +1,4 @@
-import { FC, CSSProperties, ReactNode } from 'react'
+import { FC } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -25,31 +25,18 @@ const MarkdownPreview: FC<{
 
   const { response: content, error, validating } = useFileContent(`/api/raw?path=${parentPath}/${file.name}`, path)
 
-  // Check if the image is relative path instead of a absolute url
+  // Check if the image is relative path instead of an absolute url
   const isUrlAbsolute = (url: string | string[]) => url.indexOf('://') > 0 || url.indexOf('//') === 0
   // Custom renderer:
   const customRenderer = {
     // img: to render images in markdown with relative file paths
-    img: ({
-      alt,
-      src,
-      title,
-      width,
-      height,
-      style,
-    }: {
-      alt?: string
-      src?: string
-      title?: string
-      width?: string | number
-      height?: string | number
-      style?: CSSProperties
-    }) => {
+    img(props: any) {
+      const { alt, src, title, width, height, style } = props
       return (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt={alt}
-          src={isUrlAbsolute(src as string) ? src : `/api?path=${parentPath}/${src}&raw=true`}
+          src={src && isUrlAbsolute(src) ? src : `/api?path=${parentPath}/${src}&raw=true`}
           title={title}
           width={width}
           height={height}
@@ -58,19 +45,11 @@ const MarkdownPreview: FC<{
       )
     },
     // code: to render code blocks with react-syntax-highlighter
-    code({
-      className,
-      children,
-      inline,
-      ...props
-    }: {
-      className?: string | undefined
-      children: ReactNode
-      inline?: boolean
-    }) {
+    code(props: any) {
+      const { className, children, inline, ...rest } = props
       if (inline) {
         return (
-          <code className={className} {...props}>
+          <code className={className} {...rest}>
             {children}
           </code>
         )
@@ -78,7 +57,7 @@ const MarkdownPreview: FC<{
 
       const match = /language-(\w+)/.exec(className || '')
       return (
-        <SyntaxHighlighter language={match ? match[1] : 'language-text'} style={tomorrowNight} PreTag="div" {...props}>
+        <SyntaxHighlighter language={match ? match[1] : 'text'} style={tomorrowNight} PreTag="div" {...rest}>
           {String(children).replace(/\n$/, '')}
         </SyntaxHighlighter>
       )

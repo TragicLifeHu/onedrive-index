@@ -1,23 +1,21 @@
 import { useRouter } from 'next/router'
+import DocViewer from 'react-doc-viewer'
 import { getBaseUrl } from '../../utils/getBaseUrl'
 import { getStoredToken } from '../../utils/protectedRouteHandler'
 import DownloadButtonGroup from '../DownloadBtnGtoup'
 import { DownloadBtnContainer } from './Containers'
+import React from 'react'
 
-const PDFEmbedPreview: React.FC<{ file: any }> = ({ file }) => {
+const PDFEmbedPreview: React.FC<{ file: any }> = ({ file: _file }) => {
   const { asPath } = useRouter()
   const hashedToken = getStoredToken(asPath)
 
-  const pdfPath = encodeURIComponent(
-    `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
-  )
-  const url = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${pdfPath}`
+  const rawUrl = `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  const docs = [{ uri: rawUrl }]
 
   return (
     <div>
-      <div className="w-full overflow-hidden rounded" style={{ height: '90vh' }}>
-        <iframe src={url} frameBorder="0" width="100%" height="100%"></iframe>
-      </div>
+      <DocViewer documents={docs} />
       <DownloadBtnContainer>
         <DownloadButtonGroup />
       </DownloadBtnContainer>

@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import useSystemTheme from 'react-use-system-theme'
+import useSystemTheme from '../../utils/useSystemTheme'
 import { useRouter } from 'next/router'
 
 import { LightAsync as SyntaxHighlighter } from 'react-syntax-highlighter'

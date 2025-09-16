@@ -1,8 +1,8 @@
 import type { OdFileObject } from '../../types'
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC} from 'react'
 import { useRouter } from 'next/router'
 
-import Preview from 'preview-office-docs'
+import DocViewer from 'react-doc-viewer'
 
 import DownloadButtonGroup from '../DownloadBtnGtoup'
 import { DownloadBtnContainer } from './Containers'
@@ -13,26 +13,19 @@ const OfficePreview: FC<{ file: OdFileObject }> = ({ file }) => {
   const { asPath } = useRouter()
   const hashedToken = getStoredToken(asPath)
 
-  const docContainer = useRef<HTMLDivElement>(null)
-  const [docContainerWidth, setDocContainerWidth] = useState(600)
-
+  // prepare documents for DocViewer
   const docUrl = encodeURIComponent(
     `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
   )
-
-  useEffect(() => {
-    setDocContainerWidth(docContainer.current ? docContainer.current.offsetWidth : 600)
-  }, [])
+  const docs = [{ uri: decodeURIComponent(docUrl) }]
 
   return (
-    <div>
-      <div className="overflow-scroll" ref={docContainer} style={{ maxHeight: '90vh' }}>
-        <Preview url={docUrl} width={docContainerWidth.toString()} height="600" />
-      </div>
+    <>
+      <DocViewer documents={docs} />
       <DownloadBtnContainer>
         <DownloadButtonGroup />
       </DownloadBtnContainer>
-    </div>
+    </>
   )
 }
 

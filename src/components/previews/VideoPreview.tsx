@@ -2,11 +2,11 @@ import type { OdFileObject } from '../../types'
 
 import { FC, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
 
 import axios from 'axios'
 import toast from 'react-hot-toast'
-import Plyr from 'plyr-react'
-import { useAsync } from 'react-async-hook'
+import type { PlyrOptions, PlyrSource } from 'plyr-react'
 import { useClipboard } from 'use-clipboard-copy'
 
 import { getBaseUrl } from '../../utils/getBaseUrl'
@@ -15,11 +15,12 @@ import { getStoredToken } from '../../utils/protectedRouteHandler'
 
 import { DownloadButton } from '../DownloadBtnGtoup'
 import { DownloadBtnContainer, PreviewContainer } from './Containers'
-import FourOhFour from '../FourOhFour'
 import Loading from '../Loading'
 import CustomEmbedLinkMenu from '../CustomEmbedLinkMenu'
 
 import 'plyr-react/plyr.css'
+
+const Plyr = dynamic(() => import('plyr-react'), { ssr: false })
 
 const VideoPlayer: FC<{
   videoName: string
@@ -32,7 +33,7 @@ const VideoPlayer: FC<{
   mpegts: any
 }> = ({ videoName, videoUrl, width, height, thumbnail, subtitle, isFlv, mpegts }) => {
   useEffect(() => {
-    // Really really hacky way to inject subtitles as file blobs into the video element
+    // Really hacky way to inject subtitles as file blobs into the video element
     axios
       .get(subtitle, { responseType: 'blob' })
       .then(resp => {
@@ -62,7 +63,7 @@ const VideoPlayer: FC<{
     poster: thumbnail,
     tracks: [{ kind: 'captions', label: videoName, src: '', default: true }],
   }
-  const plyrOptions: Plyr.Options = {
+  const plyrOptions: PlyrOptions = {
     ratio: `${width ?? 16}:${height ?? 9}`,
     fullscreen: { iosNative: true },
   }
@@ -70,7 +71,7 @@ const VideoPlayer: FC<{
     // If the video is not in flv format, we can use the native plyr and add sources directly with the video URL
     plyrSource['sources'] = [{ src: videoUrl }]
   }
-  return <Plyr id="plyr" source={plyrSource as Plyr.SourceInfo} options={plyrOptions} />
+  return <Plyr id="plyr" source={plyrSource as PlyrSource} options={plyrOptions} />
 }
 
 const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
@@ -91,23 +92,19 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
   const videoUrl = `/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
   const isFlv = getExtension(file.name) === 'flv'
-  const {
-    loading,
-    error,
-    result: mpegts,
-  } = useAsync(async () => {
-    if (isFlv) {
-      return (await import('mpegts.js')).default
-    }
+  const [mpegts, setMpegts] = useState<any>(null)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isFlv) return
+    import('mpegts.js')
+      .then(mod => setMpegts(mod.default))
+      .catch(err => console.error('Failed to load mpegts.js:', err))
   }, [isFlv])
 
   return (
     <>
       <CustomEmbedLinkMenu path={asPath} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <PreviewContainer>
-        {error ? (
-          <FourOhFour errorMsg={error.message} />
-        ) : loading && isFlv ? (
+        {isFlv && mpegts === null ? (
           <Loading loadingText={'Loading FLV extension...'} />
         ) : (
           <VideoPlayer
