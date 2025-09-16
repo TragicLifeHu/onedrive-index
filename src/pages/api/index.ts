@@ -1,3 +1,4 @@
+import '../polyfills'
 import { posix as pathPosix } from 'path-browserify'
 
 import axios from 'redaxios'
