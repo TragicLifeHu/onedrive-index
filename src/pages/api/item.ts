@@ -4,8 +4,6 @@ import { getAccessToken } from '.'
 import apiConfig from '../../../config/api.config'
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 export default async function handler(req: NextRequest): Promise<Response> {
   // Get access token from storage
   const accessToken = await getAccessToken()

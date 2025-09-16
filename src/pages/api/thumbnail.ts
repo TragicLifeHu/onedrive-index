@@ -7,8 +7,6 @@ import { checkAuthRoute, encodePath, getAccessToken } from '.'
 import apiConfig from '../../../config/api.config'
 import { NextRequest } from 'next/server'
 
-export const runtime = 'edge'
-
 export default async function handler(req: NextRequest): Promise<Response> {
   const accessToken = await getAccessToken()
 

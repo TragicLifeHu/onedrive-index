@@ -7,8 +7,6 @@ import { NextRequest } from 'next/server'
 
 import '../../polyfills'
 
-export const runtime = 'edge'
-
 export default async function handler(req: NextRequest): Promise<Response> {
   const accessToken = await getAccessToken()
   if (!accessToken) {
