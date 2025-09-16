@@ -59,6 +59,7 @@
     "@types/cors": "^2.8.19",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "24.5.0",
+    "@types/path-browserify": "^1.0.3",
     "@types/react": "19.1.13",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "^19.1.9",
