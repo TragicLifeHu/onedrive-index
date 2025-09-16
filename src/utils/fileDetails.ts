@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import siteConfig from '../../config/site.config'
 
 /**
- * Convert raw bits file/folder size into a human readable string
+ * Convert raw bits file/folder size into a human-readable string
  *
  * @param size File or folder size, in raw bits
  * @returns Human readable form of the file or folder size
