@@ -27,11 +27,7 @@ module.exports = {
         sans: [`"${siteConfig.googleFontSans}"`, ...defaultTheme.fontFamily.sans],
         mono: [`"${siteConfig.googleFontMono}"`, ...defaultTheme.fontFamily.mono]
       },
-      colors: {
-        gray: {
-          850: '#222226'
-        }
-      },
+      colors: {},
       animation: {
         'spin-slow': 'spin 5s linear infinite',
       }
