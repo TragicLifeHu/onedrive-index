@@ -1,15 +1,12 @@
-import { KVNamespace } from '@cloudflare/workers-types'
+import { getCfEnv } from './cfContext'
 
-function getKvBinding(): KVNamespace {
-  const kv = (globalThis as any).ONEDRIVE_CF_INDEX_KV as KVNamespace | undefined
-  if (!kv) {
-    throw new Error('KV Namespace not found. Ensure ONEDRIVE_CF_INDEX_KV is bound correctly.')
+export async function getOdAuthTokens(): Promise<{ accessToken: unknown; refreshToken: unknown }> {
+  const env = getCfEnv()
+  if (!env) {
+    throw new Error('Cloudflare environment not available. Make sure setCfEnv is called in the worker.')
   }
-  return kv
-}
 
-export async function getOdAuthTokens(): Promise<{ accessToken: string | null; refreshToken: string | null }> {
-  const kv = getKvBinding()
+  const kv = env.ONEDRIVE_CF_INDEX_KV
   const accessToken = await kv.get('access_token')
   const refreshToken = await kv.get('refresh_token')
 
@@ -19,20 +16,21 @@ export async function getOdAuthTokens(): Promise<{ accessToken: string | null; r
   }
 }
 
-export async function storeOdAuthTokens(
-  {
-    accessToken,
-    accessTokenExpiry,
-    refreshToken,
-  }: {
-    accessToken: string
-    accessTokenExpiry: number
-    refreshToken: string
+export async function storeOdAuthTokens({
+  accessToken,
+  accessTokenExpiry,
+  refreshToken,
+}: {
+  accessToken: string
+  accessTokenExpiry: number
+  refreshToken: string
+}): Promise<void> {
+  const env = getCfEnv()
+  if (!env) {
+    throw new Error('Cloudflare environment not available. Make sure setCfEnv is called in the worker.')
   }
-): Promise<void> {
-  const kv = getKvBinding()
-  // expirationTtl expects seconds; ensure it's a positive integer
-  const ttl = Math.max(0, Math.floor(accessTokenExpiry || 0))
-  await kv.put('access_token', accessToken, { expirationTtl: ttl })
+
+  const kv = env.ONEDRIVE_CF_INDEX_KV
+  await kv.put('access_token', accessToken, { expirationTtl: accessTokenExpiry })
   await kv.put('refresh_token', refreshToken)
 }
