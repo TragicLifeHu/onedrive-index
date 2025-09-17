@@ -2,7 +2,6 @@ import type { OdFileObject } from '../../types'
 
 import { FC, useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import axios from 'axios'
 import toast from 'react-hot-toast'
 import type { PlyrOptions, PlyrSource } from 'plyr-react'
 import { useClipboard } from 'use-clipboard-copy'
@@ -42,36 +41,6 @@ const VideoPlayer: FC<{
   mpegts: any
 }> = ({ videoName, videoUrl, width, height, thumbnail, subtitles, isFlv, mpegts }) => {
   useEffect(() => {
-    // Really hacky way to inject subtitles as file blobs into the video element
-    if (subtitles.length > 0) {
-      console.log('Loading subtitles:', subtitles)
-
-      // Wait a bit for Plyr to initialize
-      setTimeout(() => {
-        subtitles.forEach((subtitle, i) => {
-          axios
-            .get(subtitle.src, { responseType: 'blob' })
-            .then(resp => {
-              // More specific track selection - look for tracks in the video element
-              const video = document.querySelector('video')
-              const tracks = video?.querySelectorAll('track')
-              const track = tracks?.[i]
-
-              if (track) {
-                const blobUrl = URL.createObjectURL(resp.data)
-                track.setAttribute('src', blobUrl)
-                console.log(`Loaded subtitle: ${subtitle.label} -> ${blobUrl}`)
-              } else {
-                console.warn(`Track element not found for subtitle ${i}: ${subtitle.label}`)
-              }
-            })
-            .catch(error => {
-              console.error(`Could not load subtitle: ${subtitle.label}`, error)
-            })
-        })
-      }, 500) // Wait 500ms for Plyr to initialize
-    }
-
     if (isFlv) {
       const loadFlv = () => {
         // Really hacky way to get the exposed video element from Plyr
@@ -83,7 +52,7 @@ const VideoPlayer: FC<{
       }
       loadFlv()
     }
-  }, [videoUrl, isFlv, mpegts, subtitles])
+  }, [videoUrl, isFlv, mpegts])
 
   // Common plyr configs, including the video source and plyr options
   const plyrSource = {
@@ -93,8 +62,9 @@ const VideoPlayer: FC<{
     tracks: subtitles.map((subtitle, index) => ({
       kind: 'captions',
       label: subtitle.label,
-      src: '', // Will be populated by the useEffect
-      default: subtitle.label.toLowerCase() === 'default' || index === 0, // Make first subtitle default if no "default" label
+      srclang: subtitle.label === 'Default' ? 'und' : subtitle.label.toLowerCase(),
+      src: subtitle.src,
+      default: subtitle.label.toLowerCase() === 'default' || index === 0,
     })),
     sources: !isFlv ? [{ src: videoUrl }] : [],
   }
@@ -107,7 +77,20 @@ const VideoPlayer: FC<{
     return <Plyr source={plyrSource as PlyrSource} options={plyrOptions} />
   }
   // For FLV, Plyr is not used for playback, just for UI
-  return <video id="plyr" controls poster={thumbnail} style={{ width: '100%', height: '100%' }} />
+  return (
+    <video id="plyr" controls poster={thumbnail} style={{ width: '100%', height: '100%' }}>
+      {subtitles.map((subtitle, index) => (
+        <track
+          key={`${subtitle.label}-${index}`}
+          kind="captions"
+          label={subtitle.label}
+          srcLang={subtitle.label === 'Default' ? 'und' : subtitle.label.toLowerCase()}
+          src={subtitle.src}
+          default={subtitle.label.toLowerCase() === 'default' || index === 0}
+        />
+      ))}
+    </video>
+  )
 }
 
 const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
@@ -129,7 +112,8 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
     }
     const videoName = file.name.substring(0, file.name.lastIndexOf('.'))
     const safeVideoName = escapeRegExp(videoName)
-    const subtitleRegex = new RegExp(`^${safeVideoName}(\\..*)?\\.vtt$`)
+    // Match xxx.vtt and xxx.<lang>.vtt (case-insensitive)
+    const subtitleRegex = new RegExp(`^${safeVideoName}(?:\\.([^.]+))?\\.vtt$`, 'i')
 
     return data.folder.value.reduce((acc: { label: string; src: string }[], item: OdFileObject) => {
       const match = item.name.match(subtitleRegex)
@@ -138,7 +122,8 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
         const encodedVtt = encodeURIComponent(`${parentPath}/${item.name}`)
         acc.push({
           label,
-          src: `/api/raw?path=${encodedVtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+          // Force proxy to ensure proper CORS and content-type for VTT
+          src: `/api/raw?path=${encodedVtt}${hashedToken ? `&odpt=${hashedToken}` : ''}&proxy=true`,
         })
       }
       return acc

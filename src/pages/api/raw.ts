@@ -63,8 +63,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const size: number | undefined = 'size' in data ? Number(data['size']) : undefined
       const downloadUrl: string = data['@microsoft.graph.downloadUrl'] as string
 
-      if (proxy && size !== undefined && size < 4194304) {
-        // Proxy file through the API for small files
+      if (proxy) {
+        // Proxy file through the API when requested
         const fileResponse = await fetch(downloadUrl)
         const contentType = fileResponse.headers.get('content-type') || 'application/octet-stream'
         const ab = await fileResponse.arrayBuffer()
