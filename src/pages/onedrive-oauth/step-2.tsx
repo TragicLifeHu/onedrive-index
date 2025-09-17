@@ -104,7 +104,7 @@ export default function OAuthStep2() {
 
             <div className="mt-6 mb-2 text-right">
               <button
-                className="rounded-lg bg-gradient-to-br from-green-500 to-cyan-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-green-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-green-800"
+                className="rounded-lg bg-linear-to-br from-green-500 to-cyan-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-linear-to-bl focus:ring-4 focus:ring-green-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-green-800"
                 disabled={authCode === ''}
                 onClick={() => {
                   setButtonLoading(true)

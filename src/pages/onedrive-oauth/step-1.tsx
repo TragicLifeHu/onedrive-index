@@ -100,7 +100,7 @@ export default function OAuthStep1() {
 
             <div className="mt-6 mb-2 text-right">
               <button
-                className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-cyan-300 dark:focus:ring-cyan-800"
+                className="rounded-lg bg-linear-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-linear-to-bl focus:ring-4 focus:ring-cyan-300 dark:focus:ring-cyan-800"
                 onClick={() => {
                   router.push('/onedrive-oauth/step-2')
                 }}

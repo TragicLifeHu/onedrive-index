@@ -41,7 +41,7 @@ const GridItem = ({ c, path }: { c: OdFolderChildren; path: string }) => {
       </div>
 
       <div className="flex items-start justify-center space-x-2">
-        <span className="w-5 flex-shrink-0 text-center">
+        <span className="w-5 shrink-0 text-center">
           <ChildIcon child={c} />
         </span>
         <ChildName name={c.name} folder={Boolean(c.folder)} />
@@ -114,7 +114,7 @@ const FolderGridLayout = ({
         {folderChildren.map((c: OdFolderChildren) => (
           <div
             key={c.id}
-            className="group dark:hover:bg-gray-800 relative overflow-hidden rounded transition-all duration-100 hover:bg-gray-100"
+            className="group dark:hover:bg-gray-850 relative overflow-hidden rounded transition-all duration-100 hover:bg-gray-100"
           >
             <div className="absolute top-0 right-0 z-10 m-1 rounded bg-white/50 py-0.5 opacity-0 transition-all duration-100 group-hover:opacity-100 dark:bg-gray-900/50">
               {c.folder ? (

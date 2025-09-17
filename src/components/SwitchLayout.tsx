@@ -14,7 +14,7 @@ const SwitchLayout = () => {
   const [preferredLayout, setPreferredLayout] = useLocalStorage('preferredLayout', layouts[0])
 
   return (
-    <div className="relative w-24 flex-shrink-0 text-sm text-gray-600 md:w-28 dark:text-gray-300">
+    <div className="relative w-24 shrink-0 text-sm text-gray-600 md:w-28 dark:text-gray-300">
       <Listbox value={preferredLayout} onChange={setPreferredLayout}>
         <ListboxButton className="relative w-full cursor-pointer rounded pl-4">
           <span className="pointer-events-none flex items-center">

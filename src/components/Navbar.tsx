@@ -54,7 +54,7 @@ const Navbar = () => {
   }
 
   return (
-    <div className="bg-opacity-80 sticky top-0 z-[100] border-b border-gray-900/10 bg-white backdrop-blur-md dark:border-gray-500/30 dark:bg-gray-900">
+    <div className="bg-opacity-80 sticky top-0 z-100 border-b border-gray-900/10 bg-white backdrop-blur-md dark:border-gray-500/30 dark:bg-gray-900">
       <Toaster />
 
       <SearchModal searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
@@ -155,7 +155,7 @@ const Navbar = () => {
                   </p>
                 </div>
 
-                <div className="mt-4 max-h-32 overflow-y-scroll font-mono text-sm dark:text-gray-100">
+                <div className="mt-4 max-h-32 overflow-y-auto font-mono text-sm dark:text-gray-100">
                   {siteConfig.protectedRoutes.map((r, i) => (
                     <div key={i} className="flex items-center space-x-1">
                       <FontAwesomeIcon icon="key" />

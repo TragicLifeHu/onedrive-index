@@ -15,15 +15,15 @@ const FileListItem: FC<{ fileContent: OdFolderChildren }> = ({ fileContent: c })
   return (
     <div className="grid cursor-pointer grid-cols-10 items-center space-x-2 px-3 py-2.5">
       <div className="col-span-10 flex items-center space-x-2 truncate md:col-span-6" title={c.name}>
-        <div className="w-5 flex-shrink-0 text-center">
+        <div className="w-5 shrink-0 text-center">
           <ChildIcon child={c} />
         </div>
         <ChildName name={c.name} folder={Boolean(c.folder)} />
       </div>
-      <div className="col-span-3 hidden flex-shrink-0 font-mono text-sm text-gray-700 md:block dark:text-gray-500">
+      <div className="col-span-3 hidden shrink-0 font-mono text-sm text-gray-700 md:block dark:text-gray-500">
         {formatModifiedDateTime(c.lastModifiedDateTime)}
       </div>
-      <div className="col-span-1 hidden flex-shrink-0 truncate font-mono text-sm text-gray-700 md:block dark:text-gray-500">
+      <div className="col-span-1 hidden shrink-0 truncate font-mono text-sm text-gray-700 md:block dark:text-gray-500">
         {humanFileSize(c.size)}
       </div>
     </div>
@@ -102,7 +102,7 @@ const FolderListLayout = ({
 
       {folderChildren.map((c: OdFolderChildren) => (
         <div
-          className="grid grid-cols-12 transition-all duration-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="grid grid-cols-12 transition-all duration-100 hover:bg-gray-100 dark:hover:bg-gray-850"
           key={c.id}
         >
           <Link
