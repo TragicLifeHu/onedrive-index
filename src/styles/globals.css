@@ -1,5 +1,4 @@
-@tailwind base;
-@tailwind components;
+@import "tailwindcss/preflight";
 @tailwind utilities;
 
 @layer utilities {
@@ -15,9 +14,9 @@
 }
 
 .react-pdf__Page__canvas {
+  @reference "tailwindcss";
   @apply mx-auto border border-gray-300/40 shadow;
 }
-
 .markdown-body ul {
   @apply list-disc;
 }
@@ -26,5 +25,6 @@
 }
 pre[class*='language-'],
 code[class*='language-'] {
-  @apply font-mono !important;
+  @reference "tailwindcss";
+  @apply font-mono;
 }

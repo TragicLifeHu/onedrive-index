@@ -26,11 +26,11 @@ module.exports = {
   // [OPTIONAL] We use Google Fonts natively for font customisations.
   // You can check and generate the required links and names at https://fonts.google.com.
   // googleFontSans - the sans serif font used in onedrive-cf-index-ng.
-  googleFontSans: 'Inter',
+  googleFontSans: 'Noto Sans',
   // googleFontMono - the monospace font used in onedrive-cf-index-ng.
-  googleFontMono: 'Fira Mono',
-  // googleFontLinks -  an array of links for referencing the google font assets.
-  googleFontLinks: ['https://fonts.googleapis.com/css2?family=Fira+Mono&family=Inter:wght@400;500;700&display=swap'],
+  googleFontMono: 'Noto Sans Mono',
+  // googleFontLinks -  an array of links for referencing the Google font assets.
+  googleFontLinks: ['https://fonts.googleapis.com/css2?family=Noto+Sans+Mono&family=Noto+Sans:wght@400;500;700&display=swap'],
 
   // [OPTIONAL] The footer component of your website. You can write HTML here, but you need to escape double
   // quotes - changing " to \". You can write anything here, and if you like badges, generate some with https://shields.io
