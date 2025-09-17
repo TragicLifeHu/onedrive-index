@@ -43,17 +43,34 @@ const VideoPlayer: FC<{
 }> = ({ videoName, videoUrl, width, height, thumbnail, subtitles, isFlv, mpegts }) => {
   useEffect(() => {
     // Really hacky way to inject subtitles as file blobs into the video element
-    subtitles.forEach((subtitle, i) => {
-      axios
-        .get(subtitle.src, { responseType: 'blob' })
-        .then(resp => {
-          const track = document.querySelectorAll('track')[i]
-          track?.setAttribute('src', URL.createObjectURL(resp.data))
+    if (subtitles.length > 0) {
+      console.log('Loading subtitles:', subtitles)
+
+      // Wait a bit for Plyr to initialize
+      setTimeout(() => {
+        subtitles.forEach((subtitle, i) => {
+          axios
+            .get(subtitle.src, { responseType: 'blob' })
+            .then(resp => {
+              // More specific track selection - look for tracks in the video element
+              const video = document.querySelector('video')
+              const tracks = video?.querySelectorAll('track')
+              const track = tracks?.[i]
+
+              if (track) {
+                const blobUrl = URL.createObjectURL(resp.data)
+                track.setAttribute('src', blobUrl)
+                console.log(`Loaded subtitle: ${subtitle.label} -> ${blobUrl}`)
+              } else {
+                console.warn(`Track element not found for subtitle ${i}: ${subtitle.label}`)
+              }
+            })
+            .catch(error => {
+              console.error(`Could not load subtitle: ${subtitle.label}`, error)
+            })
         })
-        .catch(() => {
-          console.log(`Could not load subtitle: ${subtitle.label}`)
-        })
-    })
+      }, 500) // Wait 500ms for Plyr to initialize
+    }
 
     if (isFlv) {
       const loadFlv = () => {
@@ -73,17 +90,18 @@ const VideoPlayer: FC<{
     type: 'video',
     title: videoName,
     poster: thumbnail,
-    tracks: subtitles.map(subtitle => ({
+    tracks: subtitles.map((subtitle, index) => ({
       kind: 'captions',
       label: subtitle.label,
-      src: '',
-      default: subtitle.label.toLowerCase().includes('default'),
+      src: '', // Will be populated by the useEffect
+      default: subtitle.label.toLowerCase() === 'default' || index === 0, // Make first subtitle default if no "default" label
     })),
     sources: !isFlv ? [{ src: videoUrl }] : [],
   }
   const plyrOptions: PlyrOptions = {
     ratio: `${width ?? 16}:${height ?? 9}`,
     fullscreen: { iosNative: true },
+    captions: { active: true, update: true },
   }
   if (!isFlv) {
     return <Plyr source={plyrSource as PlyrSource} options={plyrOptions} />
@@ -111,18 +129,20 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
     }
     const videoName = file.name.substring(0, file.name.lastIndexOf('.'))
     const safeVideoName = escapeRegExp(videoName)
-    const subtitleRegex = new RegExp(`^${safeVideoName}(\\..+)?\\.vtt$`)
-    const subtitleFiles = data.folder.value.filter((item: OdFileObject) => {
-      return item.name.match(subtitleRegex)
-    })
-    return subtitleFiles.map((item: OdFileObject) => {
-      const label = item.name.replace(videoName, '').replace('.vtt', '').replace('.', '')
-      const encodedVtt = encodeURIComponent(`${parentPath}/${item.name}`)
-      return {
-        label: label || 'Default',
-        src: `/api/raw?path=${encodedVtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+    const subtitleRegex = new RegExp(`^${safeVideoName}(\\..*)?\\.vtt$`)
+
+    return data.folder.value.reduce((acc: { label: string; src: string }[], item: OdFileObject) => {
+      const match = item.name.match(subtitleRegex)
+      if (match) {
+        const label = match[1] ? match[1].substring(1) : 'Default'
+        const encodedVtt = encodeURIComponent(`${parentPath}/${item.name}`)
+        acc.push({
+          label,
+          src: `/api/raw?path=${encodedVtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+        })
       }
-    })
+      return acc
+    }, [])
   }, [data, file.name, hashedToken, parentPath])
 
   // OneDrive generates thumbnails for its video files, we pick the thumbnail with the highest resolution
