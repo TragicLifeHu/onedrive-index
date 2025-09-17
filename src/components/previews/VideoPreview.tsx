@@ -1,6 +1,6 @@
 import type { OdFileObject } from '../../types'
 
-import { FC, useEffect, useState, useMemo } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
 import type { PlyrOptions, PlyrSource } from 'plyr-react'
@@ -99,45 +99,73 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
   const clipboard = useClipboard()
 
   const [menuOpen, setMenuOpen] = useState(false)
+  // Collect subtitles across all folder pages
+  const [subtitles, setSubtitles] = useState<{ label: string; src: string }[]>([])
 
   const parentPath = asPath.substring(0, asPath.lastIndexOf('/'))
   const { data } = useSWR(
-    `/api/item?path=${encodeURIComponent(parentPath)}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+    [
+      `/api?path=${parentPath}`,
+      hashedToken,
+    ],
     fetcher
   )
 
-  const subtitles = useMemo(() => {
-    if (!data || !data.folder) {
-      return []
+  // Replace previous useMemo subtitles with a paginated collector
+  useEffect(() => {
+    const buildRegex = () => {
+      const videoName = file.name.substring(0, file.name.lastIndexOf('.'))
+      const safeVideoName = escapeRegExp(videoName)
+      return new RegExp(`^${safeVideoName}(?:\\.([^.]+))?\\.vtt$`, 'i')
     }
-    const videoName = file.name.substring(0, file.name.lastIndexOf('.'))
-    const safeVideoName = escapeRegExp(videoName)
-    // Match xxx.vtt and xxx.<lang>.vtt (case-insensitive)
-    const subtitleRegex = new RegExp(`^${safeVideoName}(?:\\.([^.]+))?\\.vtt$`, 'i')
 
-    return data.folder.value.reduce((acc: { label: string; src: string }[], item: OdFileObject) => {
-      const match = item.name.match(subtitleRegex)
-      if (match) {
-        const label = match[1] ? match[1].substring(1) : 'Default'
-        const encodedVtt = encodeURIComponent(`${parentPath}/${item.name}`)
-        acc.push({
-          label,
-          // Force proxy to ensure proper CORS and content-type for VTT
-          src: `/api/raw?path=${encodedVtt}${hashedToken ? `&odpt=${hashedToken}` : ''}&proxy=true`,
-        })
+    const collectFrom = (items: any[]): { label: string; src: string }[] => {
+      const rx = buildRegex()
+      const out: { label: string; src: string }[] = []
+      for (const it of items) {
+        const name: string = it.name
+        const m = name.match(rx)
+        if (m) {
+          const label = m[1] ? m[1] : 'Default'
+          const vttPath = `${parentPath}/${encodeURIComponent(name)}`
+          out.push({ label, src: `/api/raw?path=${vttPath}${hashedToken ? `&odpt=${hashedToken}` : ''}` })
+        }
       }
-      return acc
-    }, [])
+      return out
+    }
+
+    const run = async () => {
+      if (!data || !data.folder) {
+        setSubtitles([])
+        return
+      }
+      let acc = collectFrom(data.folder.value)
+      let next: string | undefined = (data as any).next
+      while (next) {
+        try {
+          const url = `/api?path=${parentPath}&next=${encodeURIComponent(next)}`
+          const resp = await fetch(url, {
+            headers: hashedToken ? { 'od-protected-token': hashedToken } as any : undefined,
+          })
+          if (!resp.ok) break
+          const page = await resp.json()
+          if (page?.folder?.value) acc = acc.concat(collectFrom(page.folder.value))
+          next = page?.next
+        } catch {
+          break
+        }
+      }
+      setSubtitles(acc)
+    }
+
+    run()
   }, [data, file.name, hashedToken, parentPath])
 
   // OneDrive generates thumbnails for its video files, we pick the thumbnail with the highest resolution
-  const thumbnail = `/api/thumbnail?path=${encodeURIComponent(asPath)}&size=large${
-    hashedToken ? `&odpt=${hashedToken}` : ''
-  }`
+  const thumbnail = `/api/thumbnail?path=${asPath}&size=large${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
-  // Encode the video path
-  const encodedPath = encodeURIComponent(asPath)
-  const videoUrl = `/api/raw?path=${encodedPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  // Video path
+  const videoUrl = `/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
   const isFlv = getExtension(file.name) === 'flv'
   const [mpegts, setMpegts] = useState<any>(null)
