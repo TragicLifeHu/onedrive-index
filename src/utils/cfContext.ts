@@ -1,16 +1,19 @@
-import { KVNamespace } from '@cloudflare/workers-types'
+// Utility to access Cloudflare context stored by Open-Next
 
-interface CloudflareEnv {
-  ONEDRIVE_CF_INDEX_KV: KVNamespace
-  // Add other environment variables as needed
+interface CfContextType {
+  env: Record<string, any>;
+  ctx: any;
+  cf: any;
 }
 
-let cfEnv: CloudflareEnv | null = null
-
-export function setCfEnv(env: CloudflareEnv): void {
-  cfEnv = env
+function getCfContext(): CfContextType | undefined {
+  return (globalThis as any)[Symbol.for("__cloudflare-context__")];
 }
 
-export function getCfEnv(): CloudflareEnv | null {
-  return cfEnv
+export function getCfEnv(): Record<string, any> | undefined {
+  return getCfContext()?.env;
+}
+
+export function getCfCtx(): any | undefined {
+  return getCfContext()?.ctx;
 }

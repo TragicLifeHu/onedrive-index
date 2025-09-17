@@ -1,19 +1,20 @@
-import { getCfEnv } from './cfContext'
+// Add import for Cloudflare context
+import { getCfEnv } from './cfContext';
 
 export async function getOdAuthTokens(): Promise<{ accessToken: unknown; refreshToken: unknown }> {
-  const env = getCfEnv()
+  // Get Cloudflare environment from AsyncLocalStorage
+  const env = getCfEnv();
   if (!env) {
     throw new Error('Cloudflare environment not available. Make sure setCfEnv is called in the worker.')
   }
-
-  const kv = env.ONEDRIVE_CF_INDEX_KV
-  const accessToken = await kv.get('access_token')
-  const refreshToken = await kv.get('refresh_token')
+  const kv = env.ONEDRIVE_CF_INDEX_KV;
+  const accessToken = await kv.get('access_token');
+  const refreshToken = await kv.get('refresh_token');
 
   return {
     accessToken,
     refreshToken,
-  }
+  };
 }
 
 export async function storeOdAuthTokens({
