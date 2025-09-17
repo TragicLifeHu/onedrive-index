@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier 'src/**/*.{js,ts,jsx,tsx}' --write"
+    "format": "prettier 'src/**/*.{js,ts,jsx,tsx}' --write",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20250913.0",
@@ -52,8 +56,7 @@
     "remark-math": "^6.0.0",
     "swr": "^2.3.6",
     "use-clipboard-copy": "^0.2.0",
-    "use-constant": "^2.0.0",
-    "wrangler": "^4.37.1"
+    "use-constant": "^2.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.13",
@@ -74,7 +77,8 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react-pdf": "^7.0.0",
     "tailwindcss": "^4.1.13",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "wrangler": "^4.37.1"
   },
   "prettier": {
     "printWidth": 120,
