@@ -177,29 +177,31 @@ export default function SearchModal({
   return (
     <Transition appear show={searchOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-[200] overflow-y-auto" onClose={closeSearchBox}>
-        <div className="min-h-screen px-4 text-center">
-          <TransitionChild
-            as={Fragment}
-            enter="ease-out duration-100"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 z-0 bg-white/80 dark:bg-gray-800/80" aria-hidden="true" />
-          </TransitionChild>
+        {/* Overlay */}
+        <TransitionChild
+          as={Fragment}
+          enter="ease-out duration-100"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 z-0 bg-white/80 dark:bg-gray-800/80" aria-hidden="true" />
+        </TransitionChild>
 
-          <TransitionChild
-            as={Fragment}
-            enter="ease-out duration-100"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-100"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <div className="z-10 my-12 inline-block w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 text-left shadow-xl transition-all">
+        {/* Modal Panel */}
+        <TransitionChild
+          as={Fragment}
+          enter="ease-out duration-100"
+          enterFrom="opacity-0 scale-95"
+          enterTo="opacity-100 scale-100"
+          leave="ease-in duration-100"
+          leaveFrom="opacity-100 scale-100"
+          leaveTo="opacity-0 scale-95"
+        >
+          <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center">
+            <div className="mt-24 mb-12 inline-block w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 text-left shadow-xl transition-all align-middle">
               <DialogTitle
                 as="h3"
                 className="flex items-center space-x-4 border-b border-gray-400/30 bg-gray-50 p-4 dark:bg-gray-800 dark:text-white"
@@ -239,8 +241,8 @@ export default function SearchModal({
                 )}
               </div>
             </div>
-          </TransitionChild>
-        </div>
+          </div>
+        </TransitionChild>
       </Dialog>
     </Transition>
   )
