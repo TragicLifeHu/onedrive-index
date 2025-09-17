@@ -27,6 +27,13 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
 }
 
+// Helper to ensure a valid aspect ratio string for Plyr
+function getValidRatio(width?: number, height?: number): string {
+  const w = Number.isFinite(width) && width! > 0 ? Math.round(width!) : 16
+  const h = Number.isFinite(height) && height! > 0 ? Math.round(height!) : 9
+  return `${w}:${h}`
+}
+
 const VideoPlayer: FC<{
   videoName: string
   videoUrl: string
@@ -104,7 +111,7 @@ const VideoPlayer: FC<{
     sources: !isFlv ? [{ src: videoUrl }] : [],
   }
   const plyrOptions: PlyrOptions = {
-    ratio: `${width ?? 16}:${height ?? 9}`,
+    ratio: getValidRatio(width, height),
     fullscreen: { iosNative: true },
     captions: { active: true, update: true },
   }
