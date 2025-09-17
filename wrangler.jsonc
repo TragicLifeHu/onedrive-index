@@ -12,8 +12,14 @@
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1
-	}
-//	"r2_buckets": [[]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "ONEDRIVE_CF_INDEX_KV",
+			"id": "177672d2ccea469c95d17b3d8ba1885a"
+		}
+	]
+//	"r2_buckets": [[][]
 //		// Use R2 incremental cache
 //		// See https://opennext.js.org/cloudflare/caching
 //		{
