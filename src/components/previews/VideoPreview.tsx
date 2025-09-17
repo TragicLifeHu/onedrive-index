@@ -1,16 +1,18 @@
 import type { OdFileObject } from '../../types'
 
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import type { PlyrOptions, PlyrSource } from 'plyr-react'
 import { useClipboard } from 'use-clipboard-copy'
 import dynamic from 'next/dynamic'
+import useSWR from 'swr'
 
 import { getBaseUrl } from '../../utils/getBaseUrl'
 import { getExtension } from '../../utils/getFileIcon'
 import { getStoredToken } from '../../utils/protectedRouteHandler'
+import { fetcher } from '../../utils/fetchWithSWR'
 
 import { DownloadButton } from '../DownloadBtnGtoup'
 import { DownloadBtnContainer, PreviewContainer } from './Containers'
@@ -21,27 +23,37 @@ const Plyr: any = dynamic(() => import('plyr-react').then(m => (m as any).defaul
 
 import 'plyr-react/plyr.css'
 
+// Helper function to escape characters for inclusion in a regular expression
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
+}
+
 const VideoPlayer: FC<{
   videoName: string
   videoUrl: string
   width?: number
   height?: number
   thumbnail: string
-  subtitle: string
+  subtitles: {
+    label: string
+    src: string
+  }[]
   isFlv: boolean
   mpegts: any
-}> = ({ videoName, videoUrl, width, height, thumbnail, subtitle, isFlv, mpegts }) => {
+}> = ({ videoName, videoUrl, width, height, thumbnail, subtitles, isFlv, mpegts }) => {
   useEffect(() => {
     // Really hacky way to inject subtitles as file blobs into the video element
-    axios
-      .get(subtitle, { responseType: 'blob' })
-      .then(resp => {
-        const track = document.querySelector('track')
-        track?.setAttribute('src', URL.createObjectURL(resp.data))
-      })
-      .catch(() => {
-        console.log('Could not load subtitle.')
-      })
+    subtitles.forEach((subtitle, i) => {
+      axios
+        .get(subtitle.src, { responseType: 'blob' })
+        .then(resp => {
+          const track = document.querySelectorAll('track')[i]
+          track?.setAttribute('src', URL.createObjectURL(resp.data))
+        })
+        .catch(() => {
+          console.log(`Could not load subtitle: ${subtitle.label}`)
+        })
+    })
 
     if (isFlv) {
       const loadFlv = () => {
@@ -54,14 +66,19 @@ const VideoPlayer: FC<{
       }
       loadFlv()
     }
-  }, [videoUrl, isFlv, mpegts, subtitle])
+  }, [videoUrl, isFlv, mpegts, subtitles])
 
   // Common plyr configs, including the video source and plyr options
   const plyrSource = {
     type: 'video',
     title: videoName,
     poster: thumbnail,
-    tracks: [{ kind: 'captions', label: videoName, src: '', default: true }],
+    tracks: subtitles.map(subtitle => ({
+      kind: 'captions',
+      label: subtitle.label,
+      src: '',
+      default: subtitle.label.toLowerCase().includes('default'),
+    })),
     sources: !isFlv ? [{ src: videoUrl }] : [],
   }
   const plyrOptions: PlyrOptions = {
@@ -82,15 +99,40 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
 
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const parentPath = asPath.substring(0, asPath.lastIndexOf('/'))
+  const { data } = useSWR(
+    `/api/item?path=${encodeURIComponent(parentPath)}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+    fetcher
+  )
+
+  const subtitles = useMemo(() => {
+    if (!data || !data.folder) {
+      return []
+    }
+    const videoName = file.name.substring(0, file.name.lastIndexOf('.'))
+    const safeVideoName = escapeRegExp(videoName)
+    const subtitleRegex = new RegExp(`^${safeVideoName}(\\..+)?\\.vtt$`)
+    const subtitleFiles = data.folder.value.filter((item: OdFileObject) => {
+      return item.name.match(subtitleRegex)
+    })
+    return subtitleFiles.map((item: OdFileObject) => {
+      const label = item.name.replace(videoName, '').replace('.vtt', '').replace('.', '')
+      const encodedVtt = encodeURIComponent(`${parentPath}/${item.name}`)
+      return {
+        label: label || 'Default',
+        src: `/api/raw?path=${encodedVtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+      }
+    })
+  }, [data, file.name, hashedToken, parentPath])
+
   // OneDrive generates thumbnails for its video files, we pick the thumbnail with the highest resolution
-  const thumbnail = `/api/thumbnail?path=${asPath}&size=large${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  const thumbnail = `/api/thumbnail?path=${encodeURIComponent(asPath)}&size=large${
+    hashedToken ? `&odpt=${hashedToken}` : ''
+  }`
 
-  // We assume subtitle files are beside the video with the same name, only webvtt '.vtt' files are supported
-  const vtt = `${asPath.substring(0, asPath.lastIndexOf('.'))}.vtt`
-  const subtitle = `/api/raw?path=${vtt}${hashedToken ? `&odpt=${hashedToken}` : ''}`
-
-  // We also format the raw video file for the in-browser player as well as all other players
-  const videoUrl = `/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  // Encode the video path
+  const encodedPath = encodeURIComponent(asPath)
+  const videoUrl = `/api/raw?path=${encodedPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
   const isFlv = getExtension(file.name) === 'flv'
   const [mpegts, setMpegts] = useState<any>(null)
@@ -114,7 +156,7 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
             width={file.video?.width}
             height={file.video?.height}
             thumbnail={thumbnail}
-            subtitle={subtitle}
+            subtitles={subtitles}
             isFlv={isFlv}
             mpegts={mpegts}
           />
