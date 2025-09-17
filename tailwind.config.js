@@ -10,7 +10,10 @@ module.exports = {
       current: 'currentColor',
       black: colors.black,
       white: colors.white,
-      gray: colors.zinc,
+      gray: {
+        ...colors.zinc,
+        850: '#222226',
+      },
       red: colors.rose,
       yellow: colors.amber,
       green: colors.green,
@@ -26,11 +29,6 @@ module.exports = {
       fontFamily: {
         sans: [`"${siteConfig.googleFontSans}"`, ...defaultTheme.fontFamily.sans],
         mono: [`"${siteConfig.googleFontMono}"`, ...defaultTheme.fontFamily.mono]
-      },
-      colors: {
-        gray: {
-          850: '#222226'
-        }
       },
       animation: {
         'spin-slow': 'spin 5s linear infinite',
