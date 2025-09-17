@@ -58,6 +58,7 @@ export const extensions = {
   srt: preview.text,
   log: preview.text,
   diff: preview.text,
+  lrc: preview.text,
 
   mp4: preview.video,
   flv: preview.video,

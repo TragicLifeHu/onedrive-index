@@ -261,33 +261,30 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
             btnText={'Customise link'}
             btnIcon="pen"
           />
-
           <DownloadButton
-            onClickCallback={() => window.open(`iina://weblink?url=${getBaseUrl()}${videoUrl}`)}
+            onClickCallback={() => { window.location.href = `iina://weblink?url=${getBaseUrl()}${videoUrl}` }}
             btnText="IINA"
             btnImage="/players/iina.png"
           />
           <DownloadButton
-            onClickCallback={() => window.open(`vlc://${getBaseUrl()}${videoUrl}`)}
+            onClickCallback={() => { window.location.href = `vlc://${getBaseUrl()}${videoUrl}` }}
             btnText="VLC"
             btnImage="/players/vlc.png"
           />
           <DownloadButton
-            onClickCallback={() => window.open(`potplayer://${getBaseUrl()}${videoUrl}`)}
+            onClickCallback={() => { window.location.href = `potplayer://${getBaseUrl()}${videoUrl}` }}
             btnText="PotPlayer"
             btnImage="/players/potplayer.png"
           />
           <DownloadButton
-            onClickCallback={() => window.open(`nplayer-http://${window?.location.hostname ?? ''}${videoUrl}`)}
+            onClickCallback={() => { window.location.href = `nplayer-http://${window?.location.hostname ?? ''}${videoUrl}` }}
             btnText="nPlayer"
             btnImage="/players/nplayer.png"
           />
           <DownloadButton
-            onClickCallback={() =>
-              window.open(
-                `intent://${getBaseUrl()}${videoUrl}#Intent;type=video/any;package=is.xyz.mpv;scheme=https;end;`,
-              )
-            }
+            onClickCallback={() => {
+              window.location.href = `intent://${getBaseUrl()}${videoUrl}#Intent;type=video/any;package=is.xyz.mpv;scheme=https;end;`
+            }}
             btnText="mpv-android"
             btnImage="/players/mpv-android.png"
           />
