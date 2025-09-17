@@ -3,7 +3,7 @@ import axios from 'redaxios'
 import { encodePath, getAccessToken } from '.'
 import apiConfig from '../../../config/api.config'
 import siteConfig from '../../../config/site.config'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 /**
  * Sanitize the search query
@@ -25,16 +25,17 @@ function sanitiseQuery(query: string): string {
   return encodeURIComponent(sanitisedQuery)
 }
 
-export default async function handler(req: NextRequest): Promise<Response> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   // Get access token from storage
   const accessToken = await getAccessToken()
 
   // Query parameter from request
-  const { q: searchQuery = '' } = Object.fromEntries(req.nextUrl.searchParams)
+  const qParam = req.query.q
+  const searchQuery = Array.isArray(qParam) ? qParam[0] ?? '' : (qParam as string) ?? ''
 
   // TODO: Set edge function caching for faster load times
 
-   // Construct Microsoft Graph Search API URL, and perform search only under the base directory
+  // Construct Microsoft Graph Search API URL, and perform search only under the base directory
   const searchRootPath = encodePath('/')
   const encodedPath = searchRootPath === '' ? searchRootPath : searchRootPath + ':'
   const searchApi = `${apiConfig.driveApi}/root${encodedPath}/search(q='${sanitiseQuery(searchQuery)}')`
@@ -46,10 +47,8 @@ export default async function handler(req: NextRequest): Promise<Response> {
         top: siteConfig.maxItems,
       },
     })
-    return NextResponse.json(data.value)
+    res.status(200).json(data.value)
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), {
-      status: error?.response?.status ?? 500,
-    })
+    res.status(error?.response?.status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
   }
 }

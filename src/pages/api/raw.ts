@@ -1,51 +1,50 @@
-import { posix as pathPosix } from 'path-browserify'
+import { getQueryParam, normalizePathParam, isMissingPath, getOdProtectedToken, parseBooleanParam } from '../../utils/api-helpers'
 import axios from 'redaxios'
 
-import { cacheControlHeader, driveApi } from '../../../config/api.config'
+import apiConfig from '../../../config/api.config'
 import { checkAuthRoute, encodePath, getAccessToken } from '.'
-import { NextRequest } from 'next/server'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-import '../../polyfills'
-
-export default async function handler(req: NextRequest): Promise<Response> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   const accessToken = await getAccessToken()
   if (!accessToken) {
-    return new Response(JSON.stringify({ error: 'No access token.' }), { status: 403 })
+    res.status(403).json({ error: 'No access token.' })
+    return
   }
 
-  const { path = '/', odpt = '', proxy = false } = Object.fromEntries(req.nextUrl.searchParams)
+  // Parse query
+  const path = getQueryParam(req, 'path', '/') || '/'
+  const odpt = getQueryParam(req, 'odpt', '')
+  const proxy = parseBooleanParam(getQueryParam(req, 'proxy', 'false'))
 
   // Sometimes the path parameter is defaulted to '[...path]' which we need to handle
-  if (path === '[...path]') {
-    return new Response(JSON.stringify({ error: 'No path specified.' }), { status: 400 })
+  if (isMissingPath(path)) {
+    res.status(400).json({ error: 'No path specified.' })
+    return
   }
 
-  const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path))
+  const cleanPath = normalizePathParam(path)
 
   // Handle protected routes authentication
-  const odTokenHeader = (req.headers.get('od-protected-token') as string) ?? odpt
+  const odTokenHeader = getOdProtectedToken(req, odpt)
 
   const { code, message } = await checkAuthRoute(cleanPath, accessToken, odTokenHeader)
-  // Status code other than 200 means user has not authenticated yet
   if (code !== 200) {
-    return new Response(JSON.stringify({ error: message }), { status: code })
+    res.status(code).json({ error: message })
+    return
   }
 
-  let headers = {
-    'Cache-Control': cacheControlHeader,
+  // Prepare headers
+  const headers: Record<string, string> = {
+    'Cache-Control': apiConfig.cacheControlHeader,
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS'
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
   }
-
-  // If message is empty, then the path is not protected.
-  // Conversely, protected routes are not allowed to serve from cache.
-  if (message !== '') {
-    headers['Cache-Control'] = 'no-cache'
-  }
+  if (message !== '') headers['Cache-Control'] = 'no-cache'
 
   try {
     // Handle response from OneDrive API
-    const requestUrl = `${driveApi}/root${encodePath(cleanPath)}`
+    const requestUrl = `${apiConfig.driveApi}/root${encodePath(cleanPath)}`
     const { data } = await axios.get(requestUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: {
@@ -55,26 +54,33 @@ export default async function handler(req: NextRequest): Promise<Response> {
     })
 
     if ('@microsoft.graph.downloadUrl' in data) {
-      // Only proxy raw file content response for files up to 4MB
-      if (proxy && 'size' in data && data['size'] < 4194304) {
-        // Fetch and proxy the file content using Web Streams API
-        const fileResponse = await fetch(data['@microsoft.graph.downloadUrl'] as string)
-        // Prepare headers for the proxied response
-        headers['Content-Type'] = fileResponse.headers.get('Content-Type') || 'application/octet-stream'
-        headers['Content-Length'] = String(data['size'])
-        // Return the streamed response
-        return new Response(fileResponse.body, { status: 200, headers })
+      const size: number | undefined = 'size' in data ? Number(data['size']) : undefined
+      const downloadUrl: string = data['@microsoft.graph.downloadUrl'] as string
+
+      if (proxy && size !== undefined && size < 4194304) {
+        // Proxy file through the API for small files
+        const fileResponse = await fetch(downloadUrl)
+        const contentType = fileResponse.headers.get('content-type') || 'application/octet-stream'
+        const ab = await fileResponse.arrayBuffer()
+        headers['Content-Type'] = contentType
+        if (size) headers['Content-Length'] = String(size)
+        Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+        res.status(200).send(Buffer.from(ab))
+        return
       } else {
-        headers['Location'] = data['@microsoft.graph.downloadUrl'] as string
-        return new Response(null, { status: 302, headers: headers})
+        // Redirect to download url
+        Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+        res.status(302).setHeader('Location', downloadUrl)
+        res.end()
+        return
       }
     } else {
-      return new Response(JSON.stringify({ error: 'No download url found.' }), { status: 404, headers: headers })
+      Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+      res.status(404).json({ error: 'No download url found.' })
+      return
     }
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), {
-      status: error?.response?.status ?? 500,
-      headers: headers
-    })
+    Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+    res.status(error?.response?.status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
   }
 }

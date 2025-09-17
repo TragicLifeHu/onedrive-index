@@ -1,50 +1,57 @@
 import type { OdThumbnail } from '../../types'
 
-import { posix as pathPosix } from 'path-browserify'
-import axios from 'redaxios'
+import { getQueryParam, normalizePathParam, isMissingPath, getOdProtectedToken } from '../../utils/api-helpers'
 
 import { checkAuthRoute, encodePath, getAccessToken } from '.'
 import apiConfig from '../../../config/api.config'
-import { NextRequest } from 'next/server'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import axios from 'redaxios'
 
-export default async function handler(req: NextRequest): Promise<Response> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   const accessToken = await getAccessToken()
 
   if (!accessToken) {
-    return new Response(JSON.stringify({ error: 'No access token.' }), { status: 403 })
+    res.status(403).json({ error: 'No access token.' })
+    return
   }
 
   // Get item thumbnails by its path since we will later check if it is protected
-  const { path = '', size = 'medium', odpt = '' } = Object.fromEntries(req.nextUrl.searchParams)
-
-  // TODO: Set edge function caching for faster load times, if route is not protected
-  // if (odpt === '') res.setHeader('Cache-Control', apiConfig.cacheControlHeader)
+  const path = getQueryParam(req, 'path', '')
+  const size = getQueryParam(req, 'size', 'medium') as 'large' | 'medium' | 'small'
+  const odpt = getQueryParam(req, 'odpt', '')
 
   // Check whether the size is valid - must be one of 'large', 'medium', or 'small'
   if (size !== 'large' && size !== 'medium' && size !== 'small') {
-    return new Response(JSON.stringify({ error: 'Invalid size.' }), { status: 400 })
+    res.status(400).json({ error: 'Invalid size.' })
+    return
   }
   // Sometimes the path parameter is defaulted to '[...path]' which we need to handle
-  if (path === '[...path]') {
-    return new Response(JSON.stringify({ error: 'No path specified.' }), { status: 400 })
+  if (isMissingPath(path)) {
+    res.status(400).json({ error: 'No path specified.' })
+    return
   }
 
-  const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path))
+  const cleanPath = normalizePathParam(path)
 
-  const { code, message } = await checkAuthRoute(cleanPath, accessToken, odpt as string)
+  const { code, message } = await checkAuthRoute(cleanPath, accessToken, getOdProtectedToken(req, odpt))
   // Status code other than 200 means user has not authenticated yet
   if (code !== 200) {
-    return new Response(JSON.stringify({ error: message }), { status: code })
+    res.status(code).json({ error: message })
+    return
   }
-  // If message is empty, then the path is not protected.
-  // Conversely, protected routes are not allowed to serve from cache.
-  // TODO
 
   const requestPath = encodePath(cleanPath)
-  // Handle response from OneDrive API
   const requestUrl = `${apiConfig.driveApi}/root${requestPath}`
-  // Whether path is root, which requires some special treatment
   const isRoot = requestPath === ''
+
+  // Prepare headers
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Cache-Control': apiConfig.cacheControlHeader,
+  }
+  // If route is protected, disable caching
+  if (message !== '') headers['Cache-Control'] = 'no-cache'
 
   try {
     const { data } = await axios.get(`${requestUrl}${isRoot ? '' : ':'}/thumbnails`, {
@@ -53,13 +60,17 @@ export default async function handler(req: NextRequest): Promise<Response> {
 
     const thumbnailUrl = data.value && data.value.length > 0 ? (data.value[0] as OdThumbnail)[size].url : null
     if (thumbnailUrl) {
-      return Response.redirect(thumbnailUrl)
+      Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+      res.status(302).setHeader('Location', thumbnailUrl)
+      res.end()
+      return
     } else {
-      return new Response(JSON.stringify({ error: "The item doesn't have a valid thumbnail." }), { status: 400 })
+      Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+      res.status(400).json({ error: "The item doesn't have a valid thumbnail." })
+      return
     }
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), {
-      status: error?.response?.status,
-    })
+    Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v))
+    res.status(error?.response?.status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
   }
 }

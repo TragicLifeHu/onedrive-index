@@ -1,4 +1,3 @@
-import '../../polyfills'
 import { posix as pathPosix } from 'path-browserify'
 
 import axios from 'redaxios'
@@ -8,7 +7,7 @@ import siteConfig from '../../../config/site.config'
 import { getAuthPersonInfo, revealObfuscatedToken } from '../../utils/oAuthHandler'
 import { compareHashedToken } from '../../utils/protectedRouteHandler'
 import { getOdAuthTokens, storeOdAuthTokens } from '../../utils/odAuthTokenStore'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 const basePath = pathPosix.resolve('/', siteConfig.baseDirectory)
 const clientSecret = revealObfuscatedToken(apiConfig.obfuscatedClientSecret)
@@ -29,7 +28,7 @@ export function encodePath(path: string): string {
 }
 
 /**
- * Fetch the access token from Redis storage and check if the token requires a renew
+ * Fetch the access token from Redis storage and check if the token requires a renewal
  *
  * @returns Access token for OneDrive API
  */
@@ -154,100 +153,105 @@ export async function checkAuthRoute(
   return { code: 200, message: 'Authenticated.' }
 }
 
-export default async function handler(req: NextRequest): Promise<Response> {
-  // If method is POST, then the API is called by the client to store acquired tokens
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   if (req.method === 'POST') {
-    const { accessToken, accessTokenExpiry, refreshToken } = await req.json()
+    const { accessToken, accessTokenExpiry, refreshToken } = (req.body || {}) as Record<string, any>
 
     if (typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
-      return new Response('Invalid request body', { status: 400 })
+      res.status(400).send('Invalid request body')
+      return
     }
 
     // verify identity of the authenticated user with the Microsoft Graph API
     const { data, status } = await getAuthPersonInfo(accessToken)
     if (status !== 200) {
-      return new Response("Non-200 response from Microsoft Graph API", { status: 500 })
+      res.status(500).send('Non-200 response from Microsoft Graph API')
+      return
     }
 
     if (data.userPrincipalName !== siteConfig.userPrincipalName) {
-      return new Response("Do not pretend to be the owner!", { status: 403 })
+      res.status(403).send('Do not pretend to be the owner!')
+      return
     }
 
     await storeOdAuthTokens({ accessToken, accessTokenExpiry, refreshToken })
-    return new Response('OK')
+    res.status(200).send('OK')
+    return
   }
 
-  // TODO: Set edge function caching for faster load times
-
-  // If method is GET, then the API is a normal request to the OneDrive API for files or folders
-  const { path = '/', next = '', sort = '' } = Object.fromEntries(req.nextUrl.searchParams)
-
-  // Sometimes the path parameter is defaulted to '[...path]' which we need to handle
-  if (path === '[...path]') {
-    return new Response(JSON.stringify({ error: 'No path specified.' }), { status: 400 })
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed.' })
+    return
   }
 
-  // Besides normalizing and making absolute, trailing slashes are trimmed
-  const cleanPath = pathPosix.resolve('/', pathPosix.normalize(path)).replace(/\/$/, '')
+  // Parse query parameters
+  const getQueryParam = (key: string, def: string = ''): string => {
+    const v = req.query[key]
+    if (Array.isArray(v)) return v[0] ?? def
+    return (v as string) ?? def
+  }
+
+  const pathParam = getQueryParam('path', '/') || '/'
+  const nextParam = getQueryParam('next', '')
+  const sortParam = getQueryParam('sort', '')
+
+  if (pathParam === '[...path]') {
+    res.status(400).json({ error: 'No path specified.' })
+    return
+  }
+
+  const cleanPath = pathPosix.resolve('/', pathPosix.normalize(pathParam)).replace(/\/$/, '')
 
   const accessToken = await getAccessToken()
 
-  // Return error 403 if access_token is empty
   if (!accessToken) {
-    return new Response(JSON.stringify({ error: 'No access token.' }), { status: 403 })
+    res.status(403).json({ error: 'No access token.' })
+    return
   }
 
-  // Handle protected routes authentication
-  const { code, message } = await checkAuthRoute(cleanPath, accessToken, req.headers.get('od-protected-token') as string)
-  // Status code other than 200 means user has not authenticated yet
+  const odProtectedHeader = (req.headers['od-protected-token'] as string) || ''
+  const { code, message } = await checkAuthRoute(cleanPath, accessToken, odProtectedHeader)
   if (code !== 200) {
-    return new Response(JSON.stringify({ error: message }), { status: code })
+    res.status(code).json({ error: message })
+    return
   }
 
   const requestPath = encodePath(cleanPath)
-  // Handle response from OneDrive API
   const requestUrl = `${apiConfig.driveApi}/root${requestPath}`
-  // Whether path is root, which requires some special treatment
   const isRoot = requestPath === ''
 
-  // Querying current path identity (file or folder) and follow up query childrens in folder
   try {
     const { data: identityData } = await axios.get(requestUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
-      params: {
-        select: 'name,size,id,lastModifiedDateTime,folder,file,video,image',
-      },
+      params: { select: 'name,size,id,lastModifiedDateTime,folder,file,video,image' },
     })
 
     if ('folder' in identityData) {
       const { data: folderData } = await axios.get(`${requestUrl}${isRoot ? '' : ':'}/children`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         params: {
-          ...{
-            select: 'name,size,id,lastModifiedDateTime,folder,file,video,image',
-            $top: siteConfig.maxItems,
-          },
-          ...(next ? { $skipToken: next } : {}),
-          ...(sort ? { $orderby: sort } : {}),
+          select: 'name,size,id,lastModifiedDateTime,folder,file,video,image',
+          $top: siteConfig.maxItems,
+          ...(nextParam ? { $skipToken: nextParam } : {}),
+          ...(sortParam ? { $orderby: sortParam } : {}),
         },
       })
 
-      // Extract next page token from full @odata.nextLink
-      const nextPage = folderData['@odata.nextLink']
-        ? folderData['@odata.nextLink'].match(/&\$skiptoken=(.+)/i)[1]
-        : null
+      const nextLink = folderData['@odata.nextLink']
+      const nextPage = nextLink ? (nextLink.match(/&\$skiptoken=(.+)/i)?.[1] ?? null) : null
 
-      // Return paging token if specified
       if (nextPage) {
-        return NextResponse.json({ folder: folderData, next: nextPage })
+        res.status(200).json({ folder: folderData, next: nextPage })
       } else {
-        return NextResponse.json({ folder: folderData })
+        res.status(200).json({ folder: folderData })
       }
+      return
     }
-    return NextResponse.json({ file: identityData })
+
+    res.status(200).json({ file: identityData })
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), {
-      status: error?.response?.code ?? 500,
-    })
+    res
+      .status(error?.response?.status ?? 500)
+      .json({ error: error?.response?.data ?? 'Internal server error.' })
   }
 }

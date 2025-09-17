@@ -2,21 +2,23 @@ import axios from 'redaxios'
 
 import { getAccessToken } from '.'
 import apiConfig from '../../../config/api.config'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req: NextRequest): Promise<Response> {
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
   // Get access token from storage
   const accessToken = await getAccessToken()
 
   // Get item details (specifically, its path) by its unique ID in OneDrive
-  const { id = '' } = Object.fromEntries(req.nextUrl.searchParams)
+  const idParam = req.query.id
+  const id = Array.isArray(idParam) ? idParam[0] ?? '' : idParam ?? ''
 
   // TODO: Set edge function caching for faster load times
 
   const idPattern = /^[a-zA-Z0-9]+$/
   if (!idPattern.test(id)) {
     // ID contains characters other than letters and numbers
-    return new Response(JSON.stringify({ error: 'Invalid driveItem ID.' }), { status: 400 })
+    res.status(400).json({ error: 'Invalid driveItem ID.' })
+    return
   }
   const itemApi = `${apiConfig.driveApi}/items/${id}`
   try {
@@ -26,8 +28,8 @@ export default async function handler(req: NextRequest): Promise<Response> {
         select: 'id,name,parentReference',
       },
     })
-    return NextResponse.json(data)
+    res.status(200).json(data)
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error?.response?.data ?? 'Internal server error.' }), { status: error?.response?.status ?? 500 })
+    res.status(error?.response?.status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
   }
 }
