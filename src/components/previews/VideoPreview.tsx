@@ -54,6 +54,41 @@ const VideoPlayer: FC<{
     }
   }, [videoUrl, isFlv, mpegts])
 
+  // Inject subtitles via blob URLs to improve reliability across environments
+  useEffect(() => {
+    let revoked: string[] = []
+    const timer = window.setTimeout(async () => {
+      try {
+        if (!subtitles.length) return
+        const video = document.querySelector('video') as HTMLVideoElement | null
+        if (!video) return
+        const tracks = Array.from(video.querySelectorAll('track'))
+        for (let i = 0; i < Math.min(tracks.length, subtitles.length); i++) {
+          const tr = tracks[i]
+          const s = subtitles[i]
+          if (!tr || !s?.src) continue
+          try {
+            const resp = await fetch(s.src, { credentials: 'same-origin' })
+            if (!resp.ok) continue
+            const blob = await resp.blob()
+            const url = URL.createObjectURL(blob)
+            tr.setAttribute('src', url)
+            revoked.push(url)
+          } catch {}
+        }
+        // Force textTracks to showing
+        const tt = video.textTracks
+        for (let i = 0; i < tt.length; i++) {
+          tt[i].mode = i === 0 ? 'showing' : 'hidden'
+        }
+      } catch {}
+    }, 300)
+    return () => {
+      window.clearTimeout(timer)
+      revoked.forEach(u => URL.revokeObjectURL(u))
+    }
+  }, [subtitles])
+
   // Common plyr configs, including the video source and plyr options
   const plyrSource = {
     type: 'video',
@@ -128,7 +163,7 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
         if (m) {
           const label = m[1] ? m[1] : 'Default'
           const vttPath = `${parentPath}/${encodeURIComponent(name)}`
-          out.push({ label, src: `/api/raw?path=${vttPath}${hashedToken ? `&odpt=${hashedToken}` : ''}` })
+          out.push({ label, src: `/api/raw?path=${vttPath}${hashedToken ? `&odpt=${hashedToken}` : ''}&proxy=true` })
         }
       }
       return out
