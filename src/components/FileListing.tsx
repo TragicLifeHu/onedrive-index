@@ -140,6 +140,14 @@ export const Downloading: FC<{ title: string; style: string }> = ({ title, style
   )
 }
 
+const extractNextData = (html: string): any | null => {
+  const match = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/)
+  if (match && match[1]) {
+    try { return JSON.parse(match[1]) } catch { /* ignore */ }
+  }
+  return null
+}
+
 const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
   const [selected, setSelected] = useState<{ [key: string]: boolean }>({})
   const [totalSelected, setTotalSelected] = useState<0 | 1 | 2>(0)
@@ -163,9 +171,14 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
       return <div />
     }
 
+    const isHTML = typeof error.message === 'string' && error.message.trim().startsWith('<')
+    // Handle HTML error responses by extracting __NEXT_DATA__ JSON
+    const nextData = isHTML ? extractNextData(error.message) : null
+    const errorMsg = nextData ? JSON.stringify(nextData.err.message, null, 2) : JSON.stringify(error.message)
+
     return (
       <PreviewContainer>
-        {error.status === 401 ? <Auth redirect={path} /> : <FourOhFour errorMsg={JSON.stringify(error.message)} />}
+        {error.status === 401 ? <Auth redirect={path} /> : <FourOhFour errorMsg={errorMsg} errorStatus={error.status} />}
       </PreviewContainer>
     )
   }
