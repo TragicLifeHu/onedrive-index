@@ -11,12 +11,12 @@ function LinkContainer({ title, value }: { title: string; value: string }) {
   const clipboard = useClipboard({ copiedTimeout: 1000 })
   return (
     <>
-      <h4 className="py-2 text-xs font-medium uppercase tracking-wider">{title}</h4>
-      <div className="group relative mb-2 max-h-24 overflow-y-scroll break-all rounded border border-gray-400/20 bg-gray-50 p-2.5 font-mono dark:bg-gray-800">
+      <h4 className="py-2 text-xs font-medium tracking-wider uppercase">{title}</h4>
+      <div className="group relative mb-2 max-h-24 overflow-y-scroll rounded border border-gray-400/20 bg-gray-50 p-2.5 font-mono break-all dark:bg-gray-800">
         <div className="opacity-80">{value}</div>
         <button
           onClick={() => clipboard.copy(value)}
-          className="absolute right-[0.2rem] top-[0.2rem] w-8 rounded border border-gray-400/40 bg-gray-100 py-1.5 opacity-0 transition-all duration-100 hover:bg-gray-200 group-hover:opacity-100 dark:bg-gray-850 dark:hover:bg-gray-700"
+          className="dark:bg-gray-850 absolute top-[0.2rem] right-[0.2rem] w-8 rounded border border-gray-400/40 bg-gray-100 py-1.5 opacity-0 transition-all duration-100 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           {clipboard.copied ? <FontAwesomeIcon icon="check" /> : <FontAwesomeIcon icon="copy" />}
         </button>
@@ -92,9 +92,9 @@ export default function CustomEmbedLinkMenu({
               </Description>
 
               <div className="mt-4">
-                <h4 className="py-2 text-xs font-medium uppercase tracking-wider">{'Filename'}</h4>
+                <h4 className="py-2 text-xs font-medium tracking-wider uppercase">{'Filename'}</h4>
                 <input
-                  className="mb-2 w-full rounded border border-gray-600/10 p-2.5 font-mono focus:outline-none focus:ring focus:ring-blue-300 dark:bg-gray-600 dark:text-white dark:focus:ring-blue-700"
+                  className="mb-2 w-full rounded border border-gray-600/10 p-2.5 font-mono focus:ring focus:ring-blue-300 focus:outline-none dark:bg-gray-600 dark:text-white dark:focus:ring-blue-700"
                   ref={focusInputRef}
                   value={name}
                   onChange={e => setName(e.target.value)}

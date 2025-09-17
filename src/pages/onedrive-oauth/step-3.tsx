@@ -28,7 +28,7 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
   const [buttonContent, setButtonContent] = useState(
     <div>
       <span>{'Store tokens'}</span> <FontAwesomeIcon icon="key" />
-    </div>
+    </div>,
   )
   const [buttonError, setButtonError] = useState(false)
 
@@ -37,7 +37,7 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
     setButtonContent(
       <div>
         <span>{'Storing tokens'}</span> <LoadingIcon className="ml-1 inline h-4 w-4 animate-spin" />
-      </div>
+      </div>,
     )
 
     await sendTokenToServer(accessToken, refreshToken, expiryTime)
@@ -46,7 +46,7 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
         setButtonContent(
           <div>
             <span>{'Stored! Going home...'}</span> <FontAwesomeIcon icon="check" />
-          </div>
+          </div>,
         )
         setTimeout(() => {
           router.push('/')
@@ -57,7 +57,7 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
         setButtonContent(
           <div>
             <span>{'Error storing the token'}</span> <FontAwesomeIcon icon="exclamation-circle" />
-          </div>
+          </div>,
         )
       })
   }
@@ -84,14 +84,14 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
             </div>
             <h3 className="mb-4 text-center text-xl font-medium">{'Welcome to your new onedrive-cf-index-ng 🎉'}</h3>
 
-            <h3 className="mb-2 mt-4 text-lg font-medium">{'Step 3/3: Get access and refresh tokens'}</h3>
+            <h3 className="mt-4 mb-2 text-lg font-medium">{'Step 3/3: Get access and refresh tokens'}</h3>
             {error ? (
               <div>
                 <p className="py-1 font-medium text-red-500">
                   <FontAwesomeIcon icon="exclamation-circle" className="mr-2" />
                   <span>{`Whoops, looks like we got a problem: ${error}.`}</span>
                 </p>
-                <p className="my-2 whitespace-pre-line rounded border border-gray-400/20 bg-gray-50 p-2 font-mono text-sm opacity-80 dark:bg-gray-800">
+                <p className="my-2 rounded border border-gray-400/20 bg-gray-50 p-2 font-mono text-sm whitespace-pre-line opacity-80 dark:bg-gray-800">
                   {description}
                 </p>
                 {errorUri && (
@@ -109,7 +109,7 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
                     on the error message.
                   </p>
                 )}
-                <div className="mb-2 mt-6 text-right">
+                <div className="mt-6 mb-2 text-right">
                   <button
                     className="rounded-lg bg-gradient-to-br from-red-500 to-orange-400 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 focus:ring-red-200 disabled:cursor-not-allowed disabled:grayscale dark:focus:ring-red-800"
                     onClick={() => {
@@ -152,17 +152,19 @@ export default function OAuthStep3({ accessToken, expiryTime, refreshToken, erro
                 </p>
                 <p className="py-1">
                   {'Final step, click the button below to store these tokens persistently before they expire ' +
-                    `after ${Math.floor(expiryTimeLeft / 60)} minutes ${expiryTimeLeft - Math.floor(expiryTimeLeft / 60) * 60
+                    `after ${Math.floor(expiryTimeLeft / 60)} minutes ${
+                      expiryTimeLeft - Math.floor(expiryTimeLeft / 60) * 60
                     } seconds. ` +
                     "Don't worry, after storing them, onedrive-cf-index-ng will take care of token refreshes and updates after your site goes live."}
                 </p>
 
-                <div className="mb-2 mt-6 text-right">
+                <div className="mt-6 mb-2 text-right">
                   <button
-                    className={`rounded-lg bg-gradient-to-br px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 ${buttonError
-                      ? 'from-red-500 to-orange-400 focus:ring-red-200 dark:focus:ring-red-800'
-                      : 'from-green-500 to-teal-300 focus:ring-green-200 dark:focus:ring-green-800'
-                      }`}
+                    className={`rounded-lg bg-gradient-to-br px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:ring-4 ${
+                      buttonError
+                        ? 'from-red-500 to-orange-400 focus:ring-red-200 dark:focus:ring-red-800'
+                        : 'from-green-500 to-teal-300 focus:ring-green-200 dark:focus:ring-green-800'
+                    }`}
                     onClick={sendAuthTokensToServer}
                   >
                     {buttonContent}
@@ -214,16 +216,20 @@ export async function getServerSideProps({ query }) {
   if (status !== 200) {
     return {
       props: {
-        error: "Non-200 response from Microsoft Graph API",
-        description: JSON.stringify(data)
+        error: 'Non-200 response from Microsoft Graph API',
+        description: JSON.stringify(data),
       },
     }
   }
   if (data.userPrincipalName !== siteConfig.userPrincipalName) {
     return {
       props: {
-        error: "Do not pretend to be the owner!",
-        description: "Authenticated user: " + data.userPrincipalName + "\n" + "UserPrincipalName in your config should match the authenticated user here!"
+        error: 'Do not pretend to be the owner!',
+        description:
+          'Authenticated user: ' +
+          data.userPrincipalName +
+          '\n' +
+          'UserPrincipalName in your config should match the authenticated user here!',
       },
     }
   }

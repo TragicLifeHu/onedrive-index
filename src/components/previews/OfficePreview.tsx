@@ -1,5 +1,5 @@
 import type { OdFileObject } from '../../types'
-import { FC} from 'react'
+import { FC } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 
@@ -19,7 +19,7 @@ const OfficePreview: FC<{ file: OdFileObject }> = ({ file }) => {
 
   // prepare documents for DocViewer
   const docUrl = encodeURIComponent(
-    `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+    `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
   )
   const docs = [{ uri: decodeURIComponent(docUrl) }]
 

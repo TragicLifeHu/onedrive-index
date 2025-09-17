@@ -23,5 +23,3 @@ export function parseBooleanParam(val: string): boolean {
   const s = (val || '').toString().trim().toLowerCase()
   return s === '1' || s === 'true' || s === 'yes' || s === 'on'
 }
-
-

@@ -11,7 +11,7 @@ const FourOhFour: React.FC<{ errorMsg: string }> = ({ errorMsg }) => {
         <div className="mb-8 text-xl font-bold">
           Oops, that&apos;s a <span className="underline decoration-red-500 decoration-wavy">four-oh-four</span>.
         </div>
-        <div className="mb-4 overflow-hidden break-all rounded border border-gray-400/20 bg-gray-50 p-2 font-mono text-xs dark:bg-gray-800">
+        <div className="mb-4 overflow-hidden rounded border border-gray-400/20 bg-gray-50 p-2 font-mono text-xs break-all dark:bg-gray-800">
           {errorMsg}
         </div>
         <div className="text-sm">

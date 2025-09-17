@@ -37,29 +37,29 @@ const DefaultPreview: FC<{ file: OdFileObject }> = ({ file }) => {
 
             <div>
               <div className="py-2 text-xs font-medium uppercase opacity-80">{'Hashes'}</div>
-              <table className="block w-full overflow-scroll whitespace-nowrap text-sm md:table">
+              <table className="block w-full overflow-scroll text-sm whitespace-nowrap md:table">
                 <tbody>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
-                    <td className="bg-gray-50 px-3 py-1 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                    <td className="bg-gray-50 px-3 py-1 text-left text-xs font-medium tracking-wider text-gray-700 uppercase dark:bg-gray-800 dark:text-gray-400">
                       Quick XOR
                     </td>
-                    <td className="whitespace-nowrap px-3 py-1 font-mono text-gray-500 dark:text-gray-400">
+                    <td className="px-3 py-1 font-mono whitespace-nowrap text-gray-500 dark:text-gray-400">
                       {file.file.hashes?.quickXorHash ?? 'Unavailable'}
                     </td>
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
-                    <td className="bg-gray-50 px-3 py-1 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                    <td className="bg-gray-50 px-3 py-1 text-left text-xs font-medium tracking-wider text-gray-700 uppercase dark:bg-gray-800 dark:text-gray-400">
                       SHA1
                     </td>
-                    <td className="whitespace-nowrap px-3 py-1 font-mono text-gray-500 dark:text-gray-400">
+                    <td className="px-3 py-1 font-mono whitespace-nowrap text-gray-500 dark:text-gray-400">
                       {file.file.hashes?.sha1Hash ?? 'Unavailable'}
                     </td>
                   </tr>
                   <tr className="border-y bg-white dark:border-gray-700 dark:bg-gray-900">
-                    <td className="bg-gray-50 px-3 py-1 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                    <td className="bg-gray-50 px-3 py-1 text-left text-xs font-medium tracking-wider text-gray-700 uppercase dark:bg-gray-800 dark:text-gray-400">
                       SHA256
                     </td>
-                    <td className="whitespace-nowrap px-3 py-1 font-mono text-gray-500 dark:text-gray-400">
+                    <td className="px-3 py-1 font-mono whitespace-nowrap text-gray-500 dark:text-gray-400">
                       {file.file.hashes?.sha256Hash ?? 'Unavailable'}
                     </td>
                   </tr>

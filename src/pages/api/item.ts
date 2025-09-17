@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Get item details (specifically, its path) by its unique ID in OneDrive
   const idParam = req.query.id
-  const id = Array.isArray(idParam) ? idParam[0] ?? '' : idParam ?? ''
+  const id = Array.isArray(idParam) ? (idParam[0] ?? '') : (idParam ?? '')
 
   // TODO: Set edge function caching for faster load times
 

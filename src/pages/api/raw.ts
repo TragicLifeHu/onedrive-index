@@ -1,4 +1,10 @@
-import { getQueryParam, normalizePathParam, isMissingPath, getOdProtectedToken, parseBooleanParam } from '../../utils/api-helpers'
+import {
+  getQueryParam,
+  normalizePathParam,
+  isMissingPath,
+  getOdProtectedToken,
+  parseBooleanParam,
+} from '../../utils/api-helpers'
 import axios from 'redaxios'
 
 import apiConfig from '../../../config/api.config'

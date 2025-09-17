@@ -111,7 +111,7 @@ export function getAuthTokenPath(path: string) {
 export async function checkAuthRoute(
   cleanPath: string,
   accessToken: string,
-  odTokenHeader: string
+  odTokenHeader: string,
 ): Promise<{ code: 200 | 401 | 404 | 500; message: string }> {
   // Handle authentication through .password
   const authTokenPath = getAuthTokenPath(cleanPath)
@@ -250,8 +250,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json({ file: identityData })
   } catch (error: any) {
-    res
-      .status(error?.response?.status ?? 500)
-      .json({ error: error?.response?.data ?? 'Internal server error.' })
+    res.status(error?.response?.status ?? 500).json({ error: error?.response?.data ?? 'Internal server error.' })
   }
 }

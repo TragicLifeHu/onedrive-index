@@ -90,15 +90,15 @@ function SearchResultItemTemplate({
     <Link
       href={driveItemPath}
       passHref
-      className={`flex items-center space-x-4 border-b border-gray-400/30 px-4 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-850 ${
+      className={`dark:hover:bg-gray-850 flex items-center space-x-4 border-b border-gray-400/30 px-4 py-1.5 hover:bg-gray-50 ${
         disabled ? 'pointer-events-none cursor-not-allowed' : 'cursor-pointer'
       }`}
     >
       <FontAwesomeIcon icon={driveItem.file ? getFileIcon(driveItem.name) : ['far', 'folder']} />
       <div>
-        <div className="text-sm font-medium leading-8">{driveItem.name}</div>
+        <div className="text-sm leading-8 font-medium">{driveItem.name}</div>
         <div
-          className={`overflow-hidden truncate font-mono text-xs opacity-60 ${
+          className={`truncate overflow-hidden font-mono text-xs opacity-60 ${
             itemDescription === 'Loading ...' && 'animate-pulse'
           }`}
         >
@@ -112,7 +112,7 @@ function SearchResultItemTemplate({
 function SearchResultItemLoadRemote({ result }: { result: OdSearchResult[number] }) {
   const { data, error }: SWRResponse<OdDriveItem, { status: number; message: any }> = useSWR(
     [`/api/item?id=${result.id}`],
-    fetcher
+    fetcher,
   )
 
   if (error) {

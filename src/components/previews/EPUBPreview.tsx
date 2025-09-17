@@ -11,10 +11,9 @@ import { getStoredToken } from '../../utils/protectedRouteHandler'
 import { Rendition } from 'epubjs'
 
 // Dynamically import ReactReader to avoid SSR issues and typing incompatibilities
-const ReactReader: any = dynamic(
-  () => import('react-reader').then(m => (m as any).ReactReader ?? (m as any).default),
-  { ssr: false }
-)
+const ReactReader: any = dynamic(() => import('react-reader').then(m => (m as any).ReactReader ?? (m as any).default), {
+  ssr: false,
+})
 
 const EPUBPreview: FC<{ file: OdFileObject }> = ({ file: _file }) => {
   const { asPath } = useRouter()

@@ -17,11 +17,7 @@ export default function useSystemTheme(defaultTheme: Theme = 'light'): Theme {
     return () => mediaQuery.removeEventListener('change', handler)
   }
 
-  const isDark = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    () => defaultTheme === 'dark'
-  )
+  const isDark = useSyncExternalStore(subscribe, getSnapshot, () => defaultTheme === 'dark')
 
   return isDark ? 'dark' : 'light'
 }

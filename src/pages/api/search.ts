@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Query parameter from request
   const qParam = req.query.q
-  const searchQuery = Array.isArray(qParam) ? qParam[0] ?? '' : (qParam as string) ?? ''
+  const searchQuery = Array.isArray(qParam) ? (qParam[0] ?? '') : ((qParam as string) ?? '')
 
   // TODO: Set edge function caching for faster load times
 
