@@ -47,33 +47,31 @@ export default function CustomEmbedLinkMenu({
   return (
     <Transition appear show={menuOpen} as={Fragment}>
       <Dialog as="div" className="fixed inset-0 z-200 overflow-y-auto" onClose={closeMenu} initialFocus={focusInputRef}>
-        <div className="min-h-screen px-4 text-center">
-          <TransitionChild
-            as={Fragment}
-            enter="ease-out duration-100"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 z-0 bg-white/60 dark:bg-gray-800/60" aria-hidden="true" />
-          </TransitionChild>
+        {/* Overlay */}
+        <TransitionChild
+          as={Fragment}
+          enter="ease-out duration-100"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 z-0 bg-white/60 dark:bg-gray-800/60" aria-hidden="true" />
+        </TransitionChild>
 
-          {/* This element is to trick the browser into centering the modal contents. */}
-          <span className="inline-block h-screen align-middle" aria-hidden="true">
-            &#8203;
-          </span>
-          <TransitionChild
-            as={Fragment}
-            enter="ease-out duration-100"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-100"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <div className="z-10 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden overflow-y-auto rounded border border-gray-400/30 bg-white p-4 text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
+        {/* Modal Panel */}
+        <TransitionChild
+          as={Fragment}
+          enter="ease-out duration-100"
+          enterFrom="opacity-0 scale-95"
+          enterTo="opacity-100 scale-100"
+          leave="ease-in duration-100"
+          leaveFrom="opacity-100 scale-100"
+          leaveTo="opacity-0 scale-95"
+        >
+          <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center">
+            <div className="mt-24 mb-12 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden overflow-y-auto rounded border border-gray-400/30 bg-white p-4 text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
               <DialogTitle as="h3" className="py-2 text-xl font-bold">
                 {'Customise direct link'}
               </DialogTitle>
@@ -120,8 +118,8 @@ export default function CustomEmbedLinkMenu({
                 />
               </div>
             </div>
-          </TransitionChild>
-        </div>
+          </div>
+        </TransitionChild>
       </Dialog>
     </Transition>
   )
