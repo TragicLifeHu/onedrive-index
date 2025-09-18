@@ -13,7 +13,6 @@ import { LoadingIcon } from './Loading'
 import { getFileIcon } from '../utils/getFileIcon'
 import { fetcher } from '../utils/fetchWithSWR'
 import siteConfig from '../../config/site.config'
-import { getCfEnv } from '../utils/cfContext'
 
 /**
  * Extract the searched item's path in field 'parentReference' and convert it to the
@@ -132,10 +131,9 @@ function SearchResultItemLoadRemote({ result }: { result: OdSearchResult[number]
     )
   }
 
-  const env = getCfEnv()
   const path = mapAbsolutePath(data.parentReference.path)
   const slicePath = '/' + path.split('/').slice(1).join('/')
-  const driveItemPath = `${(env?.BASE_DIRECTORY !== "/" ? slicePath : path)}/${encodeURIComponent(data.name)}`
+  const driveItemPath = `${slicePath}/${encodeURIComponent(data.name)}`
   return (
     <SearchResultItemTemplate
       driveItem={result}
