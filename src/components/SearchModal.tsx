@@ -34,7 +34,9 @@ function mapAbsolutePath(path: string, fullPath = true): string {
         .map(p => encodeURIComponent(decodeURIComponent(p)))
         .join('/')
     : ''
-  return fullPath ? finalPath : finalPath.split(siteConfig.baseDirectory)[0];
+  return fullPath ? finalPath : (siteConfig.baseDirectory !== "/" ?
+    finalPath.replace(siteConfig.baseDirectory, ""):
+  finalPath.replace("/root:", ""))
 }
 
 /**
