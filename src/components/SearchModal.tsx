@@ -130,6 +130,7 @@ function SearchResultItemLoadRemote({ result }: { result: OdSearchResult[number]
       <SearchResultItemTemplate driveItem={result} driveItemPath={''} itemDescription={'Loading ...'} disabled={true} />
     )
   }
+  // TODO siteConfig.baseDirectory sometimes cannot be retrieved from Cloudflare workers env
   const driveItemPath = `${mapAbsolutePath(data.parentReference.path).replace(siteConfig.baseDirectory, "")}/${encodeURIComponent(data.name)}`
   return (
     <SearchResultItemTemplate
