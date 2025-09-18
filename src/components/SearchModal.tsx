@@ -131,8 +131,8 @@ function SearchResultItemLoadRemote({ result }: { result: OdSearchResult[number]
     )
   }
 
-  const path = `/${encodeURIComponent(data.name)}`.replace(siteConfig.baseDirectory, '')
-  const driveItemPath = `${mapAbsolutePath(data.parentReference.path)}` + path
+  const path = `${mapAbsolutePath(data.parentReference.path)}`.replace(siteConfig.baseDirectory, '')
+  const driveItemPath = `${path}/${encodeURIComponent(data.name)}`
   return (
     <SearchResultItemTemplate
       driveItem={result}
