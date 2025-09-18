@@ -135,7 +135,7 @@ function SearchResultItemLoadRemote({ result }: { result: OdSearchResult[number]
   const env = getCfEnv()
   const path = mapAbsolutePath(data.parentReference.path)
   const slicePath = '/' + path.split('/').slice(1).join('/')
-  const driveItemPath = `${(env?.baseDirectory !== "/" ? slicePath : path)}/${encodeURIComponent(data.name)}`
+  const driveItemPath = `${(env?.BASE_DIRECTORY !== "/" ? slicePath : path)}/${encodeURIComponent(data.name)}`
   return (
     <SearchResultItemTemplate
       driveItem={result}
