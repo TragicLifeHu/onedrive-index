@@ -23,7 +23,7 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false)
   const openSearchBox = () => setSearchOpen(true)
 
-  useHotkeys(`${os === 'mac' ? 'meta' : 'ctrl'}+k`, e => {
+  useHotkeys(`${os === 'mac' ? 'meta' : 'ctrl'}+k`, (e: { preventDefault: () => void }) => {
     openSearchBox()
     e.preventDefault()
   })
@@ -116,25 +116,24 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Modal */}
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 z-10 overflow-y-auto" open={isOpen} onClose={() => setIsOpen(false)}>
-          <div className="min-h-screen px-4 text-center">
-            <TransitionChild
-              as={Fragment}
-              enter="ease-out duration-100"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-50"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <DialogPanel className="fixed inset-0 bg-gray-50 dark:bg-gray-800" aria-hidden="true" />
-            </TransitionChild>
+        <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
+          {/* Backdrop */}
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-100"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-50"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-50/90 dark:bg-gray-900/80" aria-hidden="true" />
+          </TransitionChild>
 
-            {/* This element is to trick the browser into centering the modal contents. */}
-            <span className="inline-block h-screen align-middle" aria-hidden="true">
-              &#8203;
-            </span>
+          {/* Panel wrapper */}
+          <div className="fixed inset-0 flex items-center justify-center p-4">
             <TransitionChild
               as={Fragment}
               enter="ease-out duration-100"
@@ -144,7 +143,7 @@ const Navbar = () => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="my-8 inline-block w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle transition-all dark:bg-gray-900">
+              <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all dark:bg-gray-900">
                 <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
                   {'Clear all tokens?'}
                 </DialogTitle>
@@ -166,20 +165,20 @@ const Navbar = () => {
 
                 <div className="mt-8 flex items-center justify-end">
                   <button
-                    className="mr-3 inline-flex items-center justify-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-400 focus:ring focus:ring-blue-300 focus:outline-none"
+                    className="mr-3 inline-flex items-center justify-center space-x-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-400 focus:outline-none focus:ring focus:ring-blue-300"
                     onClick={() => setIsOpen(false)}
                   >
                     {'Cancel'}
                   </button>
                   <button
-                    className="inline-flex items-center justify-center space-x-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-400 focus:ring focus:ring-red-300 focus:outline-none"
+                    className="inline-flex items-center justify-center space-x-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-400 focus:outline-none focus:ring focus:ring-red-300"
                     onClick={() => clearTokens()}
                   >
                     <FontAwesomeIcon icon={['far', 'trash-alt']} />
                     <span>{'Clear all'}</span>
                   </button>
                 </div>
-              </div>
+              </DialogPanel>
             </TransitionChild>
           </div>
         </Dialog>
