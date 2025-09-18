@@ -4,7 +4,7 @@
  */
 module.exports = {
   // This is what we use to identify who you are when you are initialising the website for the first time.
-  // Make sure this is exactly the same as the email address you use to sign into your Microsoft account.
+  // Make sure this is exactly the same as the email address you use to sign in to your Microsoft account.
   // You can also put this in your worker's environment variable if you worry about
   // your email being exposed in public.
   userPrincipalName: process.env.USER_PRINCIPLE_NAME || 'tragiclifehu@duck.com',
@@ -17,7 +17,7 @@ module.exports = {
   title: 'Public Index',
 
   // The folder that you are to share publicly with onedrive-cf-index-ng. Use '/' if you want to share your root folder.
-  baseDirectory: process.env.BASE_DIRECTORY || '/Shared',
+  baseDirectory: '/Shared',
 
   // [OPTIONAL] This represents the maximum number of items that one directory lists, pagination supported.
   // Do note that this is limited up to 200 items by the upstream OneDrive API.
@@ -45,7 +45,7 @@ module.exports = {
     },
   ],
 
-  // This is a day.js-style datetime format string to format datetimes in the app. Ref to
+  // This is a day.js-style datetime format string to format datetime in the app. Ref to
   // https://day.js.org/docs/en/display/format for detailed specification. The default value is ISO 8601 full datetime
   // without timezone and replacing T with space.
   datetimeFormat: 'YYYY-MM-DD HH:mm:ss',
