@@ -72,9 +72,18 @@ export default function CustomEmbedLinkMenu({
         >
           <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center">
             <div className="mt-24 mb-12 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden overflow-y-auto rounded border border-gray-400/30 bg-white p-4 text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
-              <DialogTitle as="h3" className="py-2 text-xl font-bold">
-                {'Customise direct link'}
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle as="h3" className="py-2 text-xl font-bold">
+                  {'Customise direct link'}
+                </DialogTitle>
+                <button
+                  onClick={closeMenu}
+                  className="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                  title="Close"
+                >
+                  <FontAwesomeIcon icon="xmark" size="lg" />
+                </button>
+              </div>
               <Description as="p" className="py-2 opacity-80">
                 <>
                   {'Change the raw file direct link to a URL ending with the extension of the file.'}{' '}
