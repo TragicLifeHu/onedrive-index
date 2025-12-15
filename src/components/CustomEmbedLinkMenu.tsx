@@ -71,32 +71,34 @@ export default function CustomEmbedLinkMenu({
           leaveTo="opacity-0 scale-95"
         >
           <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center">
-            <div className="mt-24 mb-12 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden overflow-y-auto rounded border border-gray-400/30 bg-white p-4 text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
-              <div className="flex items-center justify-between">
-                <DialogTitle as="h3" className="py-2 text-xl font-bold">
+            <div className="mt-24 mb-12 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 bg-white text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
+              <div className="relative flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+                <DialogTitle as="h3" className="text-xl font-bold">
                   {'Customise direct link'}
                 </DialogTitle>
                 <button
                   onClick={closeMenu}
-                  className="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                   title="Close"
+                  type="button"
                 >
                   <FontAwesomeIcon icon="xmark" size="lg" />
                 </button>
               </div>
-              <Description as="p" className="py-2 opacity-80">
-                <>
-                  {'Change the raw file direct link to a URL ending with the extension of the file.'}{' '}
-                  <a
-                    href="https://ovi.swo.moe/docs/features/customise-direct-link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 underline"
-                  >
-                    {'What is this?'}
-                  </a>
-                </>
-              </Description>
+              <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(80vh - 120px)' }}>
+                <Description as="p" className="py-2 opacity-80">
+                  <>
+                    {'Change the raw file direct link to a URL ending with the extension of the file.'}{' '}
+                    <a
+                      href="https://ovi.swo.moe/docs/features/customise-direct-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline"
+                    >
+                      {'What is this?'}
+                    </a>
+                  </>
+                </Description>
 
               <div className="mt-4">
                 <h4 className="py-2 text-xs font-medium tracking-wider uppercase">{'Filename'}</h4>
@@ -125,6 +127,7 @@ export default function CustomEmbedLinkMenu({
                   title={'Customised and encoded'}
                   value={`${getBaseUrl()}/api/name/${encodeURIComponent(name)}?path=${encodeURIComponent(path)}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
                 />
+              </div>
               </div>
             </div>
           </div>
