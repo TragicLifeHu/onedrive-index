@@ -7,8 +7,6 @@ import rehypeRaw from 'rehype-raw'
 import { LightAsync as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { tomorrowNight } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 
-import 'katex/dist/katex.min.css'
-
 import useFileContent from '../../utils/fetchOnMount'
 import FourOhFour from '../FourOhFour'
 import Loading from '../Loading'
