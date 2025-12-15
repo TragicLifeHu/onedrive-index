@@ -17,7 +17,7 @@
 @layer utilities {
     /* Chrome, Safari and Opera */
     .no-scrollbar::-webkit-scrollbar {
-        display: none;
+        @apply hidden;
     }
 
     .no-scrollbar {
@@ -27,7 +27,6 @@
 }
 
 .react-pdf__Page__canvas {
-    @reference "tailwindcss";
     @apply mx-auto border border-gray-300/40 shadow;
 }
 
@@ -41,6 +40,5 @@
 
 pre[class*='language-'],
 code[class*='language-'] {
-    @reference "tailwindcss";
-    @apply font-mono;
+    @apply font-mono!;
 }
