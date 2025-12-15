@@ -16,7 +16,7 @@
 	"kv_namespaces": [
 		{
 			"binding": "ONEDRIVE_CF_INDEX_KV",
-			"id": "177672d2ccea469c95d17b3d8ba1885a"
+			"id": "177672d2ccea469c95d17b3d8ba1885a"  // Use OWN CONFIGURATION
 		}
 	]
 //	"r2_buckets": [[][]
