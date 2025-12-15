@@ -100,21 +100,21 @@ export default function CustomEmbedLinkMenu({
 
                 <LinkContainer
                   title={'Default'}
-                  value={`${getBaseUrl()}/api/raw?path=${readablePath}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
+                  value={`${getBaseUrl()}/api/raw?path=${encodeURIComponent(readablePath)}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
                 />
                 <LinkContainer
                   title={'URL encoded'}
-                  value={`${getBaseUrl()}/api/raw?path=${path}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
+                  value={`${getBaseUrl()}/api/raw?path=${encodeURIComponent(path)}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
                 />
                 <LinkContainer
                   title={'Customised'}
-                  value={`${getBaseUrl()}/api/name/${name}?path=${readablePath}${
+                  value={`${getBaseUrl()}/api/name/${encodeURIComponent(name)}?path=${encodeURIComponent(readablePath)}${
                     hashedToken ? `&odpt=${hashedToken}` : ''
                   }`}
                 />
                 <LinkContainer
                   title={'Customised and encoded'}
-                  value={`${getBaseUrl()}/api/name/${name}?path=${path}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
+                  value={`${getBaseUrl()}/api/name/${encodeURIComponent(name)}?path=${encodeURIComponent(path)}${hashedToken ? `&odpt=${hashedToken}` : ''}`}
                 />
               </div>
             </div>

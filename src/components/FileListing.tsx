@@ -295,7 +295,7 @@ const FileListing: FC<{ query?: ParsedUrlQuery }> = ({ query }) => {
           const hashedTokenForPath = getStoredToken(p)
           yield {
             name: c?.name,
-            url: `/api/raw?path=${p}${hashedTokenForPath ? `&odpt=${hashedTokenForPath}` : ''}`,
+            url: `/api/raw?path=${encodeURIComponent(p)}${hashedTokenForPath ? `&odpt=${hashedTokenForPath}` : ''}`,
             path: p,
             isFolder,
           }

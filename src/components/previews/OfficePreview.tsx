@@ -19,7 +19,7 @@ const OfficePreview: FC<{ file: OdFileObject }> = ({ file }) => {
 
   // prepare documents for DocViewer
   const docUrl = encodeURIComponent(
-    `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
+    `${getBaseUrl()}/api/raw?path=${encodeURIComponent(asPath)}${hashedToken ? `&odpt=${hashedToken}` : ''}`,
   )
   const docs = [{ uri: decodeURIComponent(docUrl) }]
 

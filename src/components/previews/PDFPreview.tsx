@@ -15,7 +15,7 @@ const PDFEmbedPreview: React.FC<{ file: any }> = ({ file: _file }) => {
   const { asPath } = useRouter()
   const hashedToken = getStoredToken(asPath)
 
-  const rawUrl = `${getBaseUrl()}/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  const rawUrl = `${getBaseUrl()}/api/raw?path=${encodeURIComponent(asPath)}${hashedToken ? `&odpt=${hashedToken}` : ''}`
   const docs = [{ uri: rawUrl }]
 
   return (

@@ -204,10 +204,10 @@ const VideoPreview: FC<{ file: OdFileObject }> = ({ file }) => {
   }, [data, file.name, hashedToken, parentPath])
 
   // OneDrive generates thumbnails for its video files, we pick the thumbnail with the highest resolution
-  const thumbnail = `/api/thumbnail?path=${asPath}&size=large${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  const thumbnail = `/api/thumbnail?path=${encodeURIComponent(asPath)}&size=large${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
   // Video path
-  const videoUrl = `/api/raw?path=${asPath}${hashedToken ? `&odpt=${hashedToken}` : ''}`
+  const videoUrl = `/api/raw?path=${encodeURIComponent(asPath)}${hashedToken ? `&odpt=${hashedToken}` : ''}`
 
   const isFlv = getExtension(file.name) === 'flv'
   const [mpegts, setMpegts] = useState<any>(null)
