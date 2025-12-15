@@ -200,8 +200,8 @@ export default function SearchModal({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center">
-            <div className="mt-24 mb-12 inline-block w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 text-left shadow-xl transition-all align-middle">
+          <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center" onClick={closeSearchBox}>
+            <div className="mt-24 mb-12 inline-block w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 text-left shadow-xl transition-all align-middle" onClick={e => e.stopPropagation()}>
               <DialogTitle
                 as="h3"
                 className="flex items-center space-x-4 border-b border-gray-400/30 bg-gray-50 p-4 dark:bg-gray-800 dark:text-white"
@@ -219,7 +219,6 @@ export default function SearchModal({
               </DialogTitle>
               <div
                 className="max-h-[80vh] overflow-x-hidden overflow-y-auto bg-white dark:bg-gray-900 dark:text-white"
-                onClick={closeSearchBox}
               >
                 {results.loading && (
                   <div className="px-4 py-12 text-center text-sm font-medium">

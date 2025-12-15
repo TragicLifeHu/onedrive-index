@@ -70,20 +70,12 @@ export default function CustomEmbedLinkMenu({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center">
-            <div className="mt-24 mb-12 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 bg-white text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white">
+          <div className="fixed inset-0 z-10 flex items-start justify-center px-4 text-center" onClick={closeMenu}>
+            <div className="mt-24 mb-12 inline-block max-h-[80vh] w-full max-w-3xl transform overflow-hidden rounded border border-gray-400/30 bg-white text-left align-middle text-sm shadow-xl transition-all dark:bg-gray-900 dark:text-white" onClick={e => e.stopPropagation()}>
               <div className="relative flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
                 <DialogTitle as="h3" className="text-xl font-bold">
                   {'Customise direct link'}
                 </DialogTitle>
-                <button
-                  onClick={closeMenu}
-                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-                  title="Close"
-                  type="button"
-                >
-                  <FontAwesomeIcon icon="xmark" size="lg" />
-                </button>
               </div>
               <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(80vh - 120px)' }}>
                 <Description as="p" className="py-2 opacity-80">
