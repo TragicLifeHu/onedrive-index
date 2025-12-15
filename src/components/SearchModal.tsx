@@ -44,7 +44,7 @@ function mapAbsolutePath(path: string): string {
 function useDriveItemSearch() {
   const [query, setQuery] = useState('')
   const searchDriveItem = async (q: string) => {
-    const { data } = await axios.get<OdSearchResult>(`/api/search?q=${q}`)
+    const { data } = await axios.get<OdSearchResult>(`/api/search?q=${encodeURIComponent(q)}`)
 
     // Map parentReference to the absolute path of the search result
     data.map(item => {
@@ -148,12 +148,22 @@ function SearchResultItem({ result }: { result: OdSearchResult[number] }) {
     return <SearchResultItemLoadRemote result={result} />
   } else {
     // path is not an empty string in the search result, such that we can directly render the component as is
-    const driveItemPath = decodeURIComponent(result.path)
+    // Decode the path for display purposes so users see readable paths instead of encoded characters
+    const displayPath = result.path
+      .split('/')
+      .map(p => {
+        try {
+          return decodeURIComponent(p)
+        } catch {
+          return p
+        }
+      })
+      .join('/')
     return (
       <SearchResultItemTemplate
         driveItem={result}
         driveItemPath={result.path}
-        itemDescription={driveItemPath}
+        itemDescription={displayPath}
         disabled={false}
       />
     )
