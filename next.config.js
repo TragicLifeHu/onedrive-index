@@ -5,7 +5,16 @@ const nextConfig = {
   reactStrictMode: true,
 
   // Transpile ESM packages for proper module resolution
-  transpilePackages: ['plyr', 'plyr-react', 'react-doc-viewer'],
+  transpilePackages: [
+    'plyr',
+    'plyr-react',
+    'react-doc-viewer',
+    '@fortawesome/fontawesome-svg-core',
+    '@fortawesome/free-solid-svg-icons',
+    '@fortawesome/free-regular-svg-icons',
+    '@fortawesome/free-brands-svg-icons',
+    '@fortawesome/react-fontawesome',
+  ],
 
   // output: 'export',
 
